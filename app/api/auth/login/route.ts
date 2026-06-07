@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const DEMO_MODE = true
+import { db } from '@/lib/db'
+import { users } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,23 +12,28 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 })
     }
 
-    if (DEMO_MODE) {
-      const token = Buffer.from(`${email}:${Date.now()}`).toString('base64')
-      return NextResponse.json({
-        token,
-        email,
-        message: 'Login successful (demo mode)',
-      })
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
+
+    if (!user) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
-    const token = Buffer.from(`${email}:${Date.now()}`).toString('base64')
+    // TODO: compare with bcrypt.compare() in production
+    if (user.passwordHash !== password) {
+      return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
+    }
+
+    const token = Buffer.from(`${user.id}:${user.email}`).toString('base64')
     return NextResponse.json({
       token,
-      email,
-      message: 'Login successful',
+      email: user.email,
+      userId: user.id,
     })
   } catch (err) {
     console.error('[login] Error:', err)
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Login failed: ' + String(err) }, { status: 500 })
   }
 }

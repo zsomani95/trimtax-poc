@@ -19,9 +19,23 @@ export async function POST(req: NextRequest) {
       status,
     } = body;
 
+    // Extract user from auth token if provided
+    let userId: number | undefined = undefined
+    const auth = request.headers.get('authorization')
+    if (auth?.startsWith('Bearer ')) {
+      try {
+        const decoded = Buffer.from(auth.replace('Bearer ', ''), 'base64').toString('utf-8')
+        const [id] = decoded.split(':')
+        userId = parseInt(id)
+      } catch (e) {
+        // Token parsing failed, continue without user
+      }
+    }
+
     const [submission] = await db
       .insert(submissions)
       .values({
+        userId,
         ownerName: owner_name,
         ownerEmail: owner_email,
         ownerPhone: owner_phone,

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import { users } from '@/lib/db/schema'
-
-const DEMO_MODE = true
+import { eq } from 'drizzle-orm'
 
 export async function POST(request: NextRequest) {
   try {
@@ -17,14 +16,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Password must be at least 8 characters' }, { status: 400 })
     }
 
-    if (DEMO_MODE) {
-      return NextResponse.json({
-        message: 'Registration successful (demo mode)',
-        email,
-      })
-    }
-
-    const [existing] = await db.select().from(users).where({ email })
+    const [existing] = await db
+      .select()
+      .from(users)
+      .where(eq(users.email, email))
 
     if (existing) {
       return NextResponse.json({ error: 'Email already registered' }, { status: 409 })
@@ -35,13 +30,13 @@ export async function POST(request: NextRequest) {
       .values({
         fullName,
         email,
-        passwordHash: password,
+        passwordHash: password, // TODO: hash with bcrypt in production
       })
       .returning()
 
     return NextResponse.json({ message: 'Registration successful', userId: user.id })
   } catch (err) {
     console.error('[register] Error:', err)
-    return NextResponse.json({ error: String(err) }, { status: 500 })
+    return NextResponse.json({ error: 'Registration failed: ' + String(err) }, { status: 500 })
   }
 }

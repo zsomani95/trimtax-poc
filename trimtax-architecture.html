@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TrimTax Architecture Diagram</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface2: #1c2330;
+      --border: #30363d;
+      --text: #e6edf3;
+      --muted: #7d8590;
+      --green: #3fb950;
+      --blue: #58a6ff;
+      --purple: #bc8cff;
+      --orange: #f78166;
+      --yellow: #e3b341;
+      --teal: #39d353;
+      --pink: #f778ba;
+      --cyan: #79c0ff;
+
+      --layer-frontend: #1a2744;
+      --layer-api: #1a2a1a;
+      --layer-db: #2a1a1a;
+      --layer-ext: #1e1e2e;
+      --layer-data: #241e2a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      padding: 32px 24px 64px;
+    }
+
+    /* ── Header ── */
+    .header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .header h1 {
+      font-size: 2.4rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #58a6ff, #bc8cff, #f778ba);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+    .header p {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 12px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+    .badge.green { color: var(--green); border-color: var(--green); }
+    .badge.blue  { color: var(--blue);  border-color: var(--blue); }
+
+    /* ── Legend ── */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 40px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .legend-dot {
+      width: 10px; height: 10px;
+      border-radius: 3px;
+    }
+
+    /* ── Main diagram grid ── */
+    .diagram {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-rows: auto auto auto auto;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ── Layer panels ── */
+    .layer {
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 20px;
+      position: relative;
+    }
+    .layer-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .layer-label::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .layer-frontend { background: var(--layer-frontend); }
+    .layer-frontend .layer-label { color: var(--blue); }
+
+    .layer-api { background: var(--layer-api); }
+    .layer-api .layer-label { color: var(--green); }
+
+    .layer-db { background: var(--layer-db); }
+    .layer-db .layer-label { color: var(--orange); }
+
+    .layer-ext { background: var(--layer-ext); }
+    .layer-ext .layer-label { color: var(--purple); }
+
+    .layer-data { background: var(--layer-data); }
+    .layer-data .layer-label { color: var(--yellow); }
+
+    .layer-scripts { background: #1e1a2a; }
+    .layer-scripts .layer-label { color: var(--pink); }
+
+    /* ── Spans ── */
+    .span-3 { grid-column: span 3; }
+    .span-2 { grid-column: span 2; }
+    .span-1 { grid-column: span 1; }
+
+    /* ── Nodes (cards within layers) ── */
+    .nodes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .node {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 10px 13px;
+      cursor: default;
+      transition: all 0.18s ease;
+      min-width: 120px;
+    }
+    .node:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .node-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+    .node-sub {
+      font-size: 0.68rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .node-badge {
+      display: inline-block;
+      margin-top: 5px;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 0.62rem;
+      font-weight: 600;
+    }
+
+    /* ── Flow diagram (user journey) ── */
+    .flow-section {
+      max-width: 1200px;
+      margin: 32px auto 0;
+    }
+    .flow-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .flow-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .flow-steps {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+    .flow-step {
+      flex: 1;
+      min-width: 150px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 14px;
+      position: relative;
+      transition: all 0.18s;
+    }
+    .flow-step:hover {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 1px var(--blue), 0 4px 20px rgba(88,166,255,0.15);
+    }
+    .flow-arrow {
+      display: flex;
+      align-items: center;
+      padding: 0 6px;
+      color: var(--muted);
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .step-num {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .step-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .step-route {
+      font-size: 0.68rem;
+      color: var(--blue);
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      margin-bottom: 8px;
+    }
+    .step-details {
+      font-size: 0.68rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .step-api {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+      font-size: 0.65rem;
+      color: var(--green);
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+    }
+
+    /* ── Data flow section ── */
+    .data-flow {
+      max-width: 1200px;
+      margin: 32px auto 0;
+    }
+    .df-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .df-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px;
+    }
+    .df-card h3 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .df-card h3 .icon {
+      width: 24px; height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+    }
+    .df-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 8px;
+      font-size: 0.72rem;
+    }
+    .df-arrow { color: var(--muted); flex-shrink: 0; margin-top: 1px; }
+    .df-from { color: var(--blue); font-family: monospace; }
+    .df-desc { color: var(--muted); }
+
+    /* ── DB schema section ── */
+    .schema-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+      max-width: 1200px;
+      margin: 32px auto 0;
+    }
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .table-header {
+      background: rgba(247,129,102,0.15);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--orange);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .table-rows {
+      padding: 10px 0;
+    }
+    .table-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 4px 14px;
+      font-size: 0.68rem;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+    }
+    .table-row:last-child { border-bottom: none; }
+    .col-name { font-family: monospace; color: var(--text); }
+    .col-type { color: var(--muted); font-family: monospace; }
+    .col-pk { color: var(--yellow); font-size: 0.6rem; font-weight: 700; }
+    .col-fk { color: var(--purple); font-size: 0.6rem; font-weight: 700; }
+
+    /* ── Tech stack pills ── */
+    .stack-section {
+      max-width: 1200px;
+      margin: 32px auto 0;
+    }
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .stack-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      text-align: center;
+      transition: all 0.18s;
+    }
+    .stack-card:hover {
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+    .stack-icon { font-size: 1.8rem; margin-bottom: 8px; }
+    .stack-name { font-size: 0.82rem; font-weight: 600; }
+    .stack-role { font-size: 0.68rem; color: var(--muted); margin-top: 3px; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 40px;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 22px;
+      text-align: center;
+    }
+    .stat-val {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #58a6ff, #bc8cff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-lbl { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+
+    /* ── Tooltip ── */
+    .tooltip-wrap { position: relative; }
+    .tooltip-wrap:hover .tooltip { display: block; }
+    .tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: #2d333b;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.72rem;
+      color: var(--text);
+      white-space: nowrap;
+      z-index: 100;
+      pointer-events: none;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+    }
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--border);
+    }
+
+    /* colour helpers */
+    .c-blue   { color: var(--blue); }
+    .c-green  { color: var(--green); }
+    .c-orange { color: var(--orange); }
+    .c-purple { color: var(--purple); }
+    .c-yellow { color: var(--yellow); }
+    .c-pink   { color: var(--pink); }
+    .c-muted  { color: var(--muted); }
+    .bg-blue   { background: rgba(88,166,255,0.18); color: var(--blue); }
+    .bg-green  { background: rgba(63,185,80,0.18);  color: var(--green); }
+    .bg-orange { background: rgba(247,129,102,0.18);color: var(--orange); }
+    .bg-purple { background: rgba(188,140,255,0.18);color: var(--purple); }
+    .bg-yellow { background: rgba(227,179,65,0.18); color: var(--yellow); }
+    .bg-pink   { background: rgba(247,120,186,0.18);color: var(--pink); }
+
+    .divider {
+      max-width: 1200px;
+      margin: 40px auto 0;
+      border: none;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<div class="header">
+  <h1>TrimTax — System Architecture</h1>
+  <p>Texas property tax protest platform · Harris + Fort Bend counties · PoC build</p>
+  <div style="margin-top:12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+    <span class="badge green">1,516,324 real properties</span>
+    <span class="badge blue">308 MB live in NeonDB</span>
+    <span class="badge" style="color:var(--purple);border-color:var(--purple);">Phase 3 complete — PDF + E-Sig</span>
+  </div>
+</div>
+
+<!-- ═══════════════ STATS ═══════════════ -->
+<div class="stats-bar">
+  <div class="stat"><div class="stat-val">1.5M</div><div class="stat-lbl">Properties (real CAD data)</div></div>
+  <div class="stat"><div class="stat-val">10</div><div class="stat-lbl">API Routes</div></div>
+  <div class="stat"><div class="stat-val">9</div><div class="stat-lbl">Pages / Views</div></div>
+  <div class="stat"><div class="stat-val">3</div><div class="stat-lbl">DB Tables</div></div>
+  <div class="stat"><div class="stat-val">308 MB</div><div class="stat-lbl">Database size</div></div>
+</div>
+
+<!-- ═══════════════ LEGEND ═══════════════ -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Frontend (Next.js pages)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>API Routes (backend)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Database (NeonDB / Postgres)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>External services</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div>Utility / lib</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div>Data pipeline scripts</div>
+</div>
+
+<!-- ═══════════════ ARCHITECTURE GRID ═══════════════ -->
+<div class="diagram">
+
+  <!-- Row 1: Frontend pages -->
+  <div class="layer layer-frontend span-3">
+    <div class="layer-label c-blue">Frontend — Next.js 15 App Router pages</div>
+    <div class="nodes">
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Entry point · address search → results CTA</div>
+        <div class="node-title c-blue">/ Home</div>
+        <div class="node-sub">Landing page</div>
+        <span class="node-badge bg-blue">page.tsx</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">4-step wizard: search → estimate → contact → review</div>
+        <div class="node-title c-blue">/intake</div>
+        <div class="node-sub">Property intake form</div>
+        <span class="node-badge bg-blue">page.tsx</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Breakdown of comps, argued value, savings range</div>
+        <div class="node-title c-blue">/analysis/[id]</div>
+        <div class="node-sub">Savings estimate</div>
+        <span class="node-badge bg-blue">SSR</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">3-step: review → draw sig → generate PDFs → submit</div>
+        <div class="node-title c-blue">/sign/[id]</div>
+        <div class="node-sub">E-signature &amp; PDF</div>
+        <span class="node-badge bg-blue">SSR + Client</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Post-filing success: receipt, next steps, contact</div>
+        <div class="node-title c-blue">/confirmation/[id]</div>
+        <div class="node-sub">Filing confirmation</div>
+        <span class="node-badge bg-blue">SSR</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">5-step status timeline + editable notes</div>
+        <div class="node-title c-blue">/tracker/[id]</div>
+        <div class="node-sub">Protest tracker</div>
+        <span class="node-badge bg-blue">Auth required</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">All submissions: status chips, savings total, timeline</div>
+        <div class="node-title c-blue">/dashboard</div>
+        <div class="node-sub">User dashboard</div>
+        <span class="node-badge bg-blue">Auth required</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Email + password → base64 demo token in localStorage</div>
+        <div class="node-title c-blue">/login</div>
+        <div class="node-sub">Authentication</div>
+        <span class="node-badge bg-blue">Demo mode</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Full-name, email, password → users table</div>
+        <div class="node-title c-blue">/register</div>
+        <div class="node-sub">Account creation</div>
+        <span class="node-badge bg-blue">page.tsx</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Row 2: API routes (span 2) + Utilities (span 1) -->
+  <div class="layer layer-api span-2">
+    <div class="layer-label c-green">API Routes — Next.js Route Handlers</div>
+    <div class="nodes">
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">ILIKE fuzzy match on site_addr_1 using idx_properties_addr</div>
+        <div class="node-title c-green">GET /api/properties/search</div>
+        <div class="node-sub">Address autocomplete</div>
+        <span class="node-badge bg-green">Real CAD data</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Neighborhood comps → Winsorized median $/sqft → argued value → confidence score</div>
+        <div class="node-title c-green">GET /api/properties/[acct]/estimate</div>
+        <div class="node-sub">§41.43 comp engine</div>
+        <span class="node-badge bg-green">Core algorithm</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Saves all intake data + status=pending to submissions table</div>
+        <div class="node-title c-green">POST /api/submissions</div>
+        <div class="node-sub">Create submission</div>
+        <span class="node-badge bg-green">DB write</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">PATCH: attach signature_image + signed_at; status updates</div>
+        <div class="node-title c-green">PATCH /api/submissions/[id]</div>
+        <div class="node-sub">Update submission</div>
+        <span class="node-badge bg-green">DB write</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Returns submissions for authenticated user via Bearer token</div>
+        <div class="node-title c-green">GET /api/user/submissions</div>
+        <div class="node-sub">Dashboard feed</div>
+        <span class="node-badge bg-green">Auth required</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Submission + all tracking notes for tracker view</div>
+        <div class="node-title c-green">GET /api/tracker/[id]</div>
+        <div class="node-sub">Tracker data</div>
+        <span class="node-badge bg-green">Auth required</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Appends note to tracking_notes with noteType + createdBy</div>
+        <div class="node-title c-green">POST /api/tracker/[id]/notes</div>
+        <div class="node-sub">Add tracker note</div>
+        <span class="node-badge bg-green">Auth required</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Generates Forms 50-132 (market value) + 50-162 (agent auth) via pdf-lib</div>
+        <div class="node-title c-green">POST /api/generate-pdf</div>
+        <div class="node-sub">PDF form builder</div>
+        <span class="node-badge bg-green">pdf-lib</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Email + password → bcrypt check → base64 demo token</div>
+        <div class="node-title c-green">POST /api/auth/login</div>
+        <div class="node-sub">Auth — login</div>
+        <span class="node-badge bg-green">Demo mode</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">New user → users table (hash password)</div>
+        <div class="node-title c-green">POST /api/auth/register</div>
+        <div class="node-sub">Auth — register</div>
+        <span class="node-badge bg-green">Demo mode</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="layer layer-data span-1">
+    <div class="layer-label c-yellow">Utilities &amp; Services</div>
+    <div class="nodes" style="flex-direction:column;">
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">@neondatabase/serverless + drizzle-orm/neon-http · HTTP-based driver (serverless-safe)</div>
+        <div class="node-title c-yellow">lib/db/index.ts</div>
+        <div class="node-sub">Drizzle ORM client</div>
+        <span class="node-badge bg-yellow">Neon HTTP</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Drizzle table definitions: users, submissions, trackingNotes</div>
+        <div class="node-title c-yellow">lib/db/schema.ts</div>
+        <div class="node-sub">DB schema types</div>
+        <span class="node-badge bg-yellow">3 tables</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Mock-mode email: logs to console; 3 templates: confirm / status / hearing</div>
+        <div class="node-title c-yellow">lib/email.ts</div>
+        <div class="node-sub">Email service</div>
+        <span class="node-badge bg-yellow">Mock mode</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">3 demo properties (superseded by real data, kept as fallback)</div>
+        <div class="node-title c-yellow">data/mockProperties.ts</div>
+        <div class="node-sub">Fallback data</div>
+        <span class="node-badge bg-yellow">Deprecated</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Row 3: DB + External services -->
+  <div class="layer layer-db span-2">
+    <div class="layer-label c-orange">Database — NeonDB PostgreSQL (Serverless)</div>
+    <div class="nodes">
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">1,111,467 Harris + 404,857 Fort Bend · 308 MB · idx_properties_addr index</div>
+        <div class="node-title c-orange">properties</div>
+        <div class="node-sub">acct, site_addr_1, city, zip, owner_name,<br/>neighborhood_code, bld_ar, cur_appr_val,<br/>prior_appr_val, protested, county</div>
+        <span class="node-badge bg-orange">1,516,324 rows</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">One row per protest filing · includes signature_image (base64) + 5 status timestamps</div>
+        <div class="node-title c-orange">submissions</div>
+        <div class="node-sub">id, userId, ownerName, ownerEmail,<br/>propertyAddress, county, cadValue,<br/>arguedValue, projectedSavings, status,<br/>signatureImage, signedAt, resultedSavings…</div>
+        <span class="node-badge bg-orange">User filings</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Append-only audit log of status changes, hearing notices, user comments</div>
+        <div class="node-title c-orange">tracking_notes</div>
+        <div class="node-sub">id, submissionId, note, noteType,<br/>createdAt, createdBy</div>
+        <span class="node-badge bg-orange">Audit log</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">email (unique), passwordHash, fullName, timestamps</div>
+        <div class="node-title c-orange">users</div>
+        <div class="node-sub">id, email, passwordHash,<br/>fullName, createdAt, updatedAt</div>
+        <span class="node-badge bg-orange">Auth</span>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="layer layer-ext span-1">
+    <div class="layer-label c-purple">External Services</div>
+    <div class="nodes" style="flex-direction:column;">
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Free tier · 0.5 GB limit · HTTP-based driver (no WebSockets needed)</div>
+        <div class="node-title c-purple">NeonDB</div>
+        <div class="node-sub">Serverless Postgres</div>
+        <span class="node-badge bg-purple">Free tier</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Geocoding typed addresses to lat/lng for property map pins</div>
+        <div class="node-title c-purple">Nominatim (OSM)</div>
+        <div class="node-sub">Address geocoding</div>
+        <span class="node-badge bg-purple">Free / no key</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Interactive property location map via react-leaflet</div>
+        <div class="node-title c-purple">OpenStreetMap</div>
+        <div class="node-sub">Map tiles</div>
+        <span class="node-badge bg-purple">Leaflet</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Target: trimtax.vercel.app · free tier · Serverless Functions</div>
+        <div class="node-title c-purple">Vercel</div>
+        <div class="node-sub">Hosting &amp; deploy</div>
+        <span class="node-badge bg-purple">Free tier</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Row 4: Data pipeline -->
+  <div class="layer layer-scripts span-3">
+    <div class="layer-label c-pink">Data Pipeline — CAD Bulk Import Scripts (scripts/)</div>
+    <div class="nodes">
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Streams 867 MB real_acct.txt · keeps residential (state_class A) + value &lt; $1M · outputs 106 MB CSV</div>
+        <div class="node-title c-pink">filter-hcad.js</div>
+        <div class="node-sub">HCAD 867 MB → 106 MB CSV<br/>1,111,467 homes</div>
+        <span class="node-badge bg-pink">Harris</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Batched 500-row inserts via @neondatabase/serverless · ON CONFLICT DO NOTHING</div>
+        <div class="node-title c-pink">import-to-neon.js</div>
+        <div class="node-sub">CSV → NeonDB<br/>Harris 1.1M rows</div>
+        <span class="node-badge bg-pink">Harris</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Loads Owner file → Map&lt;PropertyID, OwnerName&gt;, streams Property file, joins, filters empty addresses</div>
+        <div class="node-title c-pink">filter-fbcad.js</div>
+        <div class="node-sub">FBCAD Property + Owner<br/>404,857 homes → 36 MB CSV</div>
+        <span class="node-badge bg-pink">Fort Bend</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Same batch import pattern; prior_appr_val=null, protested=N (FBCAD export gaps)</div>
+        <div class="node-title c-pink">import-fbcad-to-neon.js</div>
+        <div class="node-sub">CSV → NeonDB<br/>Fort Bend 404K rows</div>
+        <span class="node-badge bg-pink">Fort Bend</span>
+      </div>
+
+      <div class="node tooltip-wrap">
+        <div class="tooltip">Adds composite indexes for comp lookups (neighborhood_code, bld_ar, cur_appr_val)</div>
+        <div class="node-title c-pink">add-indexes.js</div>
+        <div class="node-sub">Performance indexes</div>
+        <span class="node-badge bg-pink">DBA util</span>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /diagram -->
+
+<!-- ═══════════════ USER JOURNEY FLOW ═══════════════ -->
+<div class="flow-section">
+  <div class="flow-title">User Journey — Property Tax Protest Filing</div>
+  <div class="flow-steps">
+
+    <div class="flow-step">
+      <div class="step-num">STEP 1</div>
+      <div class="step-name c-blue">Property Search</div>
+      <div class="step-route">/intake</div>
+      <div class="step-details">Homeowner types address · autocomplete from 1.5M real properties</div>
+      <div class="step-api">GET /api/properties/search?q=</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="step-num">STEP 2</div>
+      <div class="step-name c-blue">Savings Estimate</div>
+      <div class="step-route">/intake (step 2)</div>
+      <div class="step-details">§41.43 comp algo · Winsorized median $/sqft · "Save up to $X" hero number</div>
+      <div class="step-api">GET /api/properties/[acct]/estimate</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="step-num">STEP 3</div>
+      <div class="step-name c-blue">Contact Info</div>
+      <div class="step-route">/intake (step 3)</div>
+      <div class="step-details">Name, email, phone · review 25% contingency fee agreement</div>
+      <div class="step-api">— (local form state)</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="step-num">STEP 4</div>
+      <div class="step-name c-blue">Submit &amp; Sign</div>
+      <div class="step-route">/sign/[id]</div>
+      <div class="step-details">Draw e-signature · generate Forms 50-132 + 50-162 · attach signature_image</div>
+      <div class="step-api">POST /api/generate-pdf · PATCH /api/submissions/[id]</div>
+    </div>
+    <div class="flow-arrow">→</div>
+
+    <div class="flow-step">
+      <div class="step-num">STEP 5</div>
+      <div class="step-name c-blue">Track Progress</div>
+      <div class="step-route">/tracker/[id]</div>
+      <div class="step-details">5-step status timeline · system + user notes · hearing date display</div>
+      <div class="step-api">GET /api/tracker/[id]</div>
+    </div>
+
+  </div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════ DB SCHEMA ═══════════════ -->
+<div class="flow-section" style="margin-top:32px;">
+  <div class="flow-title">Database Schema</div>
+</div>
+<div class="schema-grid">
+
+  <div class="table-card">
+    <div class="table-header">📋 properties <span style="color:var(--muted);font-weight:400;font-size:0.68rem;margin-left:auto">1,516,324 rows · 308 MB</span></div>
+    <div class="table-rows">
+      <div class="table-row"><span class="col-name">acct</span><span class="col-type">TEXT</span><span class="col-pk">PK</span></div>
+      <div class="table-row"><span class="col-name">site_addr_1</span><span class="col-type">TEXT</span><span style="color:var(--green);font-size:0.6rem;font-weight:700">IDX</span></div>
+      <div class="table-row"><span class="col-name">city</span><span class="col-type">TEXT</span><span></span></div>
+      <div class="table-row"><span class="col-name">zip</span><span class="col-type">TEXT</span><span></span></div>
+      <div class="table-row"><span class="col-name">owner_name</span><span class="col-type">TEXT</span><span></span></div>
+      <div class="table-row"><span class="col-name">neighborhood_code</span><span class="col-type">TEXT</span><span></span></div>
+      <div class="table-row"><span class="col-name">bld_ar</span><span class="col-type">INTEGER</span><span style="color:var(--muted);font-size:0.6rem">sqft</span></div>
+      <div class="table-row"><span class="col-name">cur_appr_val</span><span class="col-type">INTEGER</span><span></span></div>
+      <div class="table-row"><span class="col-name">prior_appr_val</span><span class="col-type">INTEGER</span><span style="color:var(--muted);font-size:0.6rem">NULL=FBCAD</span></div>
+      <div class="table-row"><span class="col-name">protested</span><span class="col-type">TEXT</span><span></span></div>
+      <div class="table-row"><span class="col-name">county</span><span class="col-type">TEXT</span><span></span></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">📝 submissions <span style="color:var(--muted);font-weight:400;font-size:0.68rem;margin-left:auto">one row per protest filing</span></div>
+    <div class="table-rows">
+      <div class="table-row"><span class="col-name">id</span><span class="col-type">serial</span><span class="col-pk">PK</span></div>
+      <div class="table-row"><span class="col-name">userId</span><span class="col-type">integer</span><span class="col-fk">FK</span></div>
+      <div class="table-row"><span class="col-name">ownerName</span><span class="col-type">text</span><span></span></div>
+      <div class="table-row"><span class="col-name">ownerEmail</span><span class="col-type">text</span><span></span></div>
+      <div class="table-row"><span class="col-name">propertyAddress</span><span class="col-type">text</span><span></span></div>
+      <div class="table-row"><span class="col-name">county</span><span class="col-type">text</span><span></span></div>
+      <div class="table-row"><span class="col-name">cadAccountNumber</span><span class="col-type">text</span><span></span></div>
+      <div class="table-row"><span class="col-name">cadValue / arguedValue</span><span class="col-type">integer</span><span></span></div>
+      <div class="table-row"><span class="col-name">projectedSavings</span><span class="col-type">integer</span><span></span></div>
+      <div class="table-row"><span class="col-name">status</span><span class="col-type">text</span><span style="color:var(--muted);font-size:0.6rem">pending…</span></div>
+      <div class="table-row"><span class="col-name">signatureImage</span><span class="col-type">text</span><span style="color:var(--muted);font-size:0.6rem">base64</span></div>
+      <div class="table-row"><span class="col-name">signedAt / resultedAt</span><span class="col-type">timestamp</span><span></span></div>
+      <div class="table-row"><span class="col-name">resultedSavings</span><span class="col-type">integer</span><span></span></div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">🗒 tracking_notes <span style="color:var(--muted);font-weight:400;font-size:0.68rem;margin-left:auto">append-only audit log</span></div>
+    <div class="table-rows">
+      <div class="table-row"><span class="col-name">id</span><span class="col-type">serial</span><span class="col-pk">PK</span></div>
+      <div class="table-row"><span class="col-name">submissionId</span><span class="col-type">integer</span><span class="col-fk">FK</span></div>
+      <div class="table-row"><span class="col-name">note</span><span class="col-type">text</span><span></span></div>
+      <div class="table-row"><span class="col-name">noteType</span><span class="col-type">text</span><span></span></div>
+      <div class="table-row" style="margin-top:4px;padding-top:4px;border-top:1px solid var(--border)">
+        <span class="col-name" style="color:var(--muted);font-size:0.65rem">noteType values:</span>
+      </div>
+      <div class="table-row"><span class="col-name" style="color:var(--muted)">"status_update"</span><span class="col-type"></span><span></span></div>
+      <div class="table-row"><span class="col-name" style="color:var(--muted)">"hearing_notice"</span><span class="col-type"></span><span></span></div>
+      <div class="table-row"><span class="col-name" style="color:var(--muted)">"result"</span><span class="col-type"></span><span></span></div>
+      <div class="table-row"><span class="col-name" style="color:var(--muted)">"user_note"</span><span class="col-type"></span><span></span></div>
+      <div class="table-row"><span class="col-name">createdAt</span><span class="col-type">timestamp</span><span></span></div>
+      <div class="table-row"><span class="col-name">createdBy</span><span class="col-type">text</span><span style="color:var(--muted);font-size:0.6rem">"system"/email</span></div>
+    </div>
+  </div>
+
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════ DATA FLOWS ═══════════════ -->
+<div class="flow-section" style="margin-top:32px;">
+  <div class="flow-title">Key Data Flows</div>
+</div>
+<div class="df-grid" style="max-width:1200px; margin: 0 auto;">
+
+  <div class="df-card">
+    <h3>
+      <span class="icon" style="background:rgba(63,185,80,0.18)">⚡</span>
+      §41.43 Comp Engine (estimate route)
+    </h3>
+    <div class="df-row"><span class="df-arrow">1.</span><span>Fetch subject property from <span class="df-from">properties</span> by acct</span></div>
+    <div class="df-row"><span class="df-arrow">2.</span><span>Query comps: same <span class="df-from">neighborhood_code</span> + similar sqft (±30%)</span></div>
+    <div class="df-row"><span class="df-arrow">3.</span><span>Fallback to zip code if &lt;5 neighborhood comps</span></div>
+    <div class="df-row"><span class="df-arrow">4.</span><span>Compute <span class="df-from">$/sqft</span> for each comp</span></div>
+    <div class="df-row"><span class="df-arrow">5.</span><span>Winsorize at 10th/90th percentile (remove outliers)</span></div>
+    <div class="df-row"><span class="df-arrow">6.</span><span>Median $/sqft × subject sqft = <span class="df-from">arguedValue</span></span></div>
+    <div class="df-row"><span class="df-arrow">7.</span><span>Confidence: comp count + CV + overage % → low/medium/high</span></div>
+    <div class="df-row"><span class="df-arrow">8.</span><span>Return savings = cadValue − arguedValue</span></div>
+  </div>
+
+  <div class="df-card">
+    <h3>
+      <span class="icon" style="background:rgba(247,120,186,0.18)">📄</span>
+      PDF Generation Flow (generate-pdf)
+    </h3>
+    <div class="df-row"><span class="df-arrow">1.</span><span>Receive <span class="df-from">submissionId</span> + property data + base64 signature</span></div>
+    <div class="df-row"><span class="df-arrow">2.</span><span>Create new <span class="df-from">PDFDocument</span> via pdf-lib</span></div>
+    <div class="df-row"><span class="df-arrow">3.</span><span>Page 1: Form 50-132 — Property Value Protest</span></div>
+    <div class="df-row"><span class="df-arrow">4.</span><span>&nbsp;&nbsp;└ Fill: owner, address, county, CAD value, argued value</span></div>
+    <div class="df-row"><span class="df-arrow">5.</span><span>Page 2: Form 50-162 — Designated Agent Authorization</span></div>
+    <div class="df-row"><span class="df-arrow">6.</span><span>&nbsp;&nbsp;└ Fill: same + embed signature image as PNG</span></div>
+    <div class="df-row"><span class="df-arrow">7.</span><span>Serialize PDF bytes → return as <span class="df-from">application/pdf</span> download</span></div>
+  </div>
+
+  <div class="df-card">
+    <h3>
+      <span class="icon" style="background:rgba(88,166,255,0.18)">🔍</span>
+      Property Search Flow (search route)
+    </h3>
+    <div class="df-row"><span class="df-arrow">1.</span><span>Receive query param <span class="df-from">?q=</span> (partial address string)</span></div>
+    <div class="df-row"><span class="df-arrow">2.</span><span>SQL: <span class="df-from">WHERE site_addr_1 ILIKE '%q%'</span> LIMIT 10</span></div>
+    <div class="df-row"><span class="df-arrow">3.</span><span>Uses <span class="df-from">idx_properties_addr</span> B-tree index (fast scan)</span></div>
+    <div class="df-row"><span class="df-arrow">4.</span><span>Returns acct, address, city, zip, county, owner, cur_appr_val, bld_ar</span></div>
+    <div class="df-row"><span class="df-arrow">5.</span><span>Intake step 1 renders results as clickable autocomplete list</span></div>
+  </div>
+
+  <div class="df-card">
+    <h3>
+      <span class="icon" style="background:rgba(188,140,255,0.18)">🔐</span>
+      Auth Flow (Demo Mode)
+    </h3>
+    <div class="df-row"><span class="df-arrow">1.</span><span>Register: hash password → insert into <span class="df-from">users</span> table</span></div>
+    <div class="df-row"><span class="df-arrow">2.</span><span>Login: lookup by email → verify hash → return token</span></div>
+    <div class="df-row"><span class="df-arrow">3.</span><span>Token format: <span class="df-from">btoa(email + ":" + timestamp)</span></span></div>
+    <div class="df-row"><span class="df-arrow">4.</span><span>Token stored in <span class="df-from">localStorage</span> by client</span></div>
+    <div class="df-row"><span class="df-arrow">5.</span><span>Auth'd routes: check <span class="df-from">Authorization: Bearer &lt;token&gt;</span> header</span></div>
+    <div class="df-row"><span class="df-arrow">6.</span><span>Decode token → extract email → look up userId</span></div>
+    <div class="df-row"><span class="df-arrow" style="color:var(--orange)">⚠</span><span style="color:var(--orange)">Not production-safe — replace before launch</span></div>
+  </div>
+
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════ TECH STACK ═══════════════ -->
+<div class="flow-section" style="margin-top:32px;">
+  <div class="flow-title">Tech Stack</div>
+</div>
+<div class="stack-grid" style="max-width:1200px; margin: 0 auto;">
+  <div class="stack-card"><div class="stack-icon">⚡</div><div class="stack-name">Next.js 15</div><div class="stack-role">App Router · SSR + API routes</div></div>
+  <div class="stack-card"><div class="stack-icon">⚛</div><div class="stack-name">React 19</div><div class="stack-role">UI library</div></div>
+  <div class="stack-card"><div class="stack-icon">🎨</div><div class="stack-name">Tailwind v4</div><div class="stack-role">Styling</div></div>
+  <div class="stack-card"><div class="stack-icon">🗄</div><div class="stack-name">NeonDB</div><div class="stack-role">Serverless Postgres · 308 MB</div></div>
+  <div class="stack-card"><div class="stack-icon">🔷</div><div class="stack-name">Drizzle ORM</div><div class="stack-role">Type-safe DB layer</div></div>
+  <div class="stack-card"><div class="stack-icon">📋</div><div class="stack-name">pdf-lib</div><div class="stack-role">Forms 50-132 + 50-162</div></div>
+  <div class="stack-card"><div class="stack-icon">✍</div><div class="stack-name">react-signature-canvas</div><div class="stack-role">E-signature capture</div></div>
+  <div class="stack-card"><div class="stack-icon">🗺</div><div class="stack-name">react-leaflet</div><div class="stack-role">Property map (OSM tiles)</div></div>
+  <div class="stack-card"><div class="stack-icon">🔍</div><div class="stack-name">Zod + RHF</div><div class="stack-role">Form validation</div></div>
+  <div class="stack-card"><div class="stack-icon">🚀</div><div class="stack-name">Vercel</div><div class="stack-role">Hosting · free tier</div></div>
+  <div class="stack-card"><div class="stack-icon">📦</div><div class="stack-name">TypeScript 5</div><div class="stack-role">Type safety throughout</div></div>
+  <div class="stack-card"><div class="stack-icon">🧩</div><div class="stack-name">shadcn/ui</div><div class="stack-role">UI component primitives</div></div>
+</div>
+
+<hr class="divider" />
+
+<!-- ═══════════════ KNOWN ISSUES / ROADMAP ═══════════════ -->
+<div class="flow-section" style="margin-top:32px; margin-bottom:0;">
+  <div class="flow-title">Build Roadmap &amp; Known Issues</div>
+</div>
+<div style="max-width:1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+
+  <div class="df-card">
+    <h3><span class="icon" style="background:rgba(63,185,80,0.18)">✅</span> Completed phases</h3>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--green)">✓</span>&nbsp;<span>Phase 0 — DB setup (submissions table)</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--green)">✓</span>&nbsp;<span>Phase 1 — 4-step intake form</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--green)">✓</span>&nbsp;<span>Phase 2 — Analysis page</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--green)">✓</span>&nbsp;<span>Phase 2.5 — Real CAD data wired to UI</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--green)">✓</span>&nbsp;<span>Phase 3 — PDF generation + e-signature</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--green)">✓</span>&nbsp;<span>Phase 6 — HCAD + FBCAD bulk import (1.5M rows)</span></div>
+  </div>
+
+  <div class="df-card">
+    <h3><span class="icon" style="background:rgba(247,129,102,0.18)">🔨</span> Remaining &amp; known issues</h3>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--muted)">○</span>&nbsp;<span>Phase 4 — Confirmation page</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--muted)">○</span>&nbsp;<span>Phase 5 — Vercel deploy (trimtax.vercel.app)</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--orange)">⚠</span>&nbsp;<span>PropertyMap.tsx pin hardcoded to downtown Houston</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--orange)">⚠</span>&nbsp;<span>Auth is demo-mode only (base64 token — not production-safe)</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--orange)">⚠</span>&nbsp;<span>FBCAD missing prior_appr_val, protested flag, neighborhood codes</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--orange)">⚠</span>&nbsp;<span>Email service in mock mode (logs to console only)</span></div>
+    <div class="df-row" style="margin-bottom:6px;"><span style="color:var(--orange)">⚠</span>&nbsp;<span>drizzle-kit push broken — use Neon SQL Editor for schema changes</span></div>
+  </div>
+
+</div>
+
+<!-- footer -->
+<div style="text-align:center; margin-top:48px; color:var(--muted); font-size:0.72rem;">
+  TrimTax PoC · Generated 2026-06-07 · Harris County 1,111,467 + Fort Bend 404,857 properties
+</div>
+
+</body>
+</html>

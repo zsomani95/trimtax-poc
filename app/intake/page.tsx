@@ -116,9 +116,13 @@ export default function IntakePage() {
     setSubmitting(true)
     setSubmitError('')
     try {
+      const token = localStorage.getItem('authToken')
       const res = await fetch('/api/submissions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
         body: JSON.stringify({
           owner_name: ownerName,
           owner_email: ownerEmail,

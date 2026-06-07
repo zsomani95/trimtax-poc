@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { submissions } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 export async function GET(request: NextRequest) {
   try {
@@ -7,34 +10,26 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const mockSubmissions = [
-      {
-        id: 1,
-        propertyAddress: '101 WESTHEIMER RD A, HOUSTON, TX 77006',
-        county: 'Harris',
-        cadValue: 431743,
-        arguedValue: 461946,
-        projectedSavings: 0,
-        status: 'pending',
-        createdAt: new Date().toISOString(),
-        hearingDate: null,
-        resultedSavings: null,
-      },
-      {
-        id: 2,
-        propertyAddress: '750 110000007, BELLAIRE, TX 77401',
-        county: 'Harris',
-        cadValue: 803472,
-        arguedValue: 1055943,
-        projectedSavings: 0,
-        status: 'signed',
-        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-        hearingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-        resultedSavings: null,
-      },
-    ]
+    // Extract userId from token
+    let userId: number | null = null
+    try {
+      const decoded = Buffer.from(auth.replace('Bearer ', ''), 'base64').toString('utf-8')
+      const [id] = decoded.split(':')
+      userId = parseInt(id)
+    } catch (e) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
 
-    return NextResponse.json({ submissions: mockSubmissions })
+    if (!userId) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+    }
+
+    const userSubmissions = await db
+      .select()
+      .from(submissions)
+      .where(eq(submissions.userId, userId))
+
+    return NextResponse.json({ submissions: userSubmissions || [] })
   } catch (err) {
     console.error('[submissions] Error:', err)
     return NextResponse.json({ error: String(err) }, { status: 500 })

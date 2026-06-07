@@ -1,4 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { db } from '@/lib/db'
+import { submissions, trackingNotes } from '@/lib/db/schema'
+import { eq, and } from 'drizzle-orm'
 
 export async function GET(
   request: NextRequest,
@@ -10,46 +13,41 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = await params
-
-    const mockSubmission = {
-      id: parseInt(id),
-      propertyAddress: '101 WESTHEIMER RD A, HOUSTON, TX 77006',
-      county: 'Harris',
-      cadAccountNumber: '0041410000037',
-      cadValue: 431743,
-      arguedValue: 461946,
-      projectedSavings: 0,
-      status: 'pending',
-      createdAt: new Date().toISOString(),
-      signedAt: null,
-      submittedAt: null,
-      hearingScheduledAt: null,
-      hearingDate: null,
-      resultedAt: null,
-      resultedSavings: null,
+    // Extract userId from token
+    let userId: number | null = null
+    try {
+      const decoded = Buffer.from(auth.replace('Bearer ', ''), 'base64').toString('utf-8')
+      const [id] = decoded.split(':')
+      userId = parseInt(id)
+    } catch (e) {
+      return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
     }
 
-    const mockNotes = [
-      {
-        id: 1,
-        note: 'Property submitted for valuation analysis',
-        noteType: 'status_update',
-        createdAt: new Date().toISOString(),
-        createdBy: 'system',
-      },
-      {
-        id: 2,
-        note: 'Your signature has been received and forms are ready to file',
-        noteType: 'status_update',
-        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        createdBy: 'system',
-      },
-    ]
+    const { id } = await params
+    const submissionId = parseInt(id)
+
+    // Get submission and verify ownership
+    const [submission] = await db
+      .select()
+      .from(submissions)
+      .where(and(
+        eq(submissions.id, submissionId),
+        eq(submissions.userId, userId)
+      ))
+
+    if (!submission) {
+      return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    }
+
+    // Get notes for this submission
+    const notes = await db
+      .select()
+      .from(trackingNotes)
+      .where(eq(trackingNotes.submissionId, submissionId))
 
     return NextResponse.json({
-      submission: mockSubmission,
-      notes: mockNotes,
+      submission,
+      notes: notes || [],
     })
   } catch (err) {
     console.error('[tracker] Error:', err)
