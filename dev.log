@@ -1,0 +1,14 @@
+
+> trimtax-poc@0.1.0 dev
+> next dev --webpack
+
+⚠ Port 3000 is in use by process 14936, using available port 3002 instead.
+▲ Next.js 16.2.7 (webpack)
+- Local:         http://localhost:3002
+- Network:       http://10.4.0.152:3002
+- Environments: .env.local
+✓ Ready in 1121ms
+⚠ Attempted to load @next/swc-win32-arm64-msvc, but an error occurred: The specified module could not be found.
+\\?\C:\Users\adver\OneDrive\Documents\trimtax-poc\node_modules\@next\swc-win32-arm64-msvc\next-swc.win32-arm64-msvc.node
+  Skipping creating a lockfile at C:\Users\adver\OneDrive\Documents\trimtax-poc\.next\dev\lock because we're using WASM bindings
+

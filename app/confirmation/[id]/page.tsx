@@ -40,11 +40,29 @@ export default async function ConfirmationPage({
       <div style={{ display: 'flex', alignItems: 'center', minHeight: 'calc(100vh - 60px)', padding: '20px' }}>
         <div style={{ maxWidth: '700px', margin: '0 auto', width: '100%' }}>
 
-        <div style={{ background: '#fff', borderRadius: '12px', padding: '40px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)', marginBottom: '24px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
-            <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#111827', margin: '0 0 12px 0' }}>Protest Filed!</h1>
-            <p style={{ color: '#666', fontSize: '16px', margin: 0 }}>Your property tax protest has been successfully submitted.</p>
+        <div style={{ background: '#fff', borderRadius: '12px', padding: '48px 40px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)', marginBottom: '24px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+            {/* Success Icon with Animation */}
+            <div style={{
+              width: '120px',
+              height: '120px',
+              margin: '0 auto 20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative'
+            }}>
+              <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
+                <circle cx="60" cy="60" r="55" fill="none" stroke="#059669" strokeWidth="2" opacity="0.2"/>
+                <circle cx="60" cy="60" r="45" fill="#059669" opacity="0.08"/>
+                <path d="M 35 60 L 50 75 L 85 40" stroke="#059669" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="25" cy="25" r="3" fill="#059669" opacity="0.6"/>
+                <circle cx="95" cy="30" r="3" fill="#059669" opacity="0.6"/>
+                <circle cx="100" cy="90" r="3" fill="#059669" opacity="0.6"/>
+              </svg>
+            </div>
+            <h1 style={{ fontSize: '36px', fontWeight: 700, color: '#111827', margin: '0 0 12px 0', letterSpacing: '-0.5px' }}>Protest Filed!</h1>
+            <p style={{ color: '#6b7280', fontSize: '17px', margin: 0, fontWeight: 500, lineHeight: 1.6 }}>Your property tax protest has been successfully submitted to the appraisal district.</p>
           </div>
 
           <div style={{

@@ -272,26 +272,113 @@ export default function HomePage() {
           </div>
 
           {/* Features Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '24px' }}>
-            <div className="feature" style={{ padding: '24px', background: colors.white, borderRadius: '10px', border: `1px solid ${colors.grayLight}`, transition: 'all 0.3s ease', cursor: 'default' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>📊</div>
-              <p style={{ fontWeight: 600, margin: '0 0 6px 0', color: colors.darkText, fontSize: '15px' }}>Real Data</p>
-              <p style={{ color: colors.gray, fontSize: '13px', margin: 0 }}>1.5M properties from Harris & Fort Bend</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '24px' }}>
+            <div className="feature" style={{
+              padding: '28px 24px',
+              background: colors.white,
+              borderRadius: '12px',
+              border: `1px solid ${colors.grayLight}`,
+              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+              textAlign: 'center',
+              transition: 'all 0.3s ease',
+              cursor: 'default',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                width: '80px',
+                height: '80px',
+                background: `radial-gradient(circle, ${colors.primary}15 0%, transparent 70%)`,
+                borderRadius: '50%',
+                zIndex: 0
+              }} />
+              <div style={{ fontSize: '48px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>📊</div>
+              <p style={{ fontWeight: 700, margin: '0 0 8px 0', color: colors.darkText, fontSize: '16px', letterSpacing: '-0.3px' }}>Real Data</p>
+              <p style={{ color: colors.gray, fontSize: '14px', margin: 0, lineHeight: 1.5 }}>1.5M verified properties</p>
             </div>
-            <div className="feature" style={{ padding: '24px', background: colors.white, borderRadius: '10px', border: `1px solid ${colors.grayLight}`, transition: 'all 0.3s ease', cursor: 'default' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎯</div>
-              <p style={{ fontWeight: 600, margin: '0 0 6px 0', color: colors.darkText, fontSize: '15px' }}>Smart Analysis</p>
-              <p style={{ color: colors.gray, fontSize: '13px', margin: 0 }}>Instant estimates with confidence scores</p>
+
+            <div className="feature" style={{
+              padding: '28px 24px',
+              background: colors.white,
+              borderRadius: '12px',
+              border: `1px solid ${colors.grayLight}`,
+              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+              textAlign: 'center',
+              transition: 'all 0.3s ease',
+              cursor: 'default',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                width: '80px',
+                height: '80px',
+                background: `radial-gradient(circle, ${colors.primary}15 0%, transparent 70%)`,
+                borderRadius: '50%',
+                zIndex: 0
+              }} />
+              <div style={{ fontSize: '48px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>🎯</div>
+              <p style={{ fontWeight: 700, margin: '0 0 8px 0', color: colors.darkText, fontSize: '16px', letterSpacing: '-0.3px' }}>Smart Analysis</p>
+              <p style={{ color: colors.gray, fontSize: '14px', margin: 0, lineHeight: 1.5 }}>Instant accurate estimates</p>
             </div>
-            <div className="feature" style={{ padding: '24px', background: colors.white, borderRadius: '10px', border: `1px solid ${colors.grayLight}`, transition: 'all 0.3s ease', cursor: 'default' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>✍️</div>
-              <p style={{ fontWeight: 600, margin: '0 0 6px 0', color: colors.darkText, fontSize: '15px' }}>E-Signature</p>
-              <p style={{ color: colors.gray, fontSize: '13px', margin: 0 }}>Sign & file your protest in minutes</p>
+
+            <div className="feature" style={{
+              padding: '28px 24px',
+              background: colors.white,
+              borderRadius: '12px',
+              border: `1px solid ${colors.grayLight}`,
+              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+              textAlign: 'center',
+              transition: 'all 0.3s ease',
+              cursor: 'default',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                width: '80px',
+                height: '80px',
+                background: `radial-gradient(circle, ${colors.primary}15 0%, transparent 70%)`,
+                borderRadius: '50%',
+                zIndex: 0
+              }} />
+              <div style={{ fontSize: '48px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>✍️</div>
+              <p style={{ fontWeight: 700, margin: '0 0 8px 0', color: colors.darkText, fontSize: '16px', letterSpacing: '-0.3px' }}>E-Signature</p>
+              <p style={{ color: colors.gray, fontSize: '14px', margin: 0, lineHeight: 1.5 }}>Sign in minutes</p>
             </div>
-            <div className="feature" style={{ padding: '24px', background: colors.white, borderRadius: '10px', border: `1px solid ${colors.grayLight}`, transition: 'all 0.3s ease', cursor: 'default' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>💰</div>
-              <p style={{ fontWeight: 600, margin: '0 0 6px 0', color: colors.darkText, fontSize: '15px' }}>25% Contingency</p>
-              <p style={{ color: colors.gray, fontSize: '13px', margin: 0 }}>Pay only if we win</p>
+
+            <div className="feature" style={{
+              padding: '28px 24px',
+              background: colors.white,
+              borderRadius: '12px',
+              border: `1px solid ${colors.grayLight}`,
+              boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+              textAlign: 'center',
+              transition: 'all 0.3s ease',
+              cursor: 'default',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              <div style={{
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                width: '80px',
+                height: '80px',
+                background: `radial-gradient(circle, ${colors.primary}15 0%, transparent 70%)`,
+                borderRadius: '50%',
+                zIndex: 0
+              }} />
+              <div style={{ fontSize: '48px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>💰</div>
+              <p style={{ fontWeight: 700, margin: '0 0 8px 0', color: colors.darkText, fontSize: '16px', letterSpacing: '-0.3px' }}>Contingency</p>
+              <p style={{ color: colors.gray, fontSize: '14px', margin: 0, lineHeight: 1.5 }}>25% only if we win</p>
             </div>
           </div>
         </div>

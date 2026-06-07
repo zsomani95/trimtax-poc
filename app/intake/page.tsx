@@ -199,8 +199,46 @@ export default function IntakePage() {
       </div>
 
       <div style={{ maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '0 20px 20px 20px' }}>
-        <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '28px' }}>Find Your Property</h2>
-        <p style={{ color: '#666', marginTop: 0, marginBottom: '30px' }}>Automated Texas property tax protest</p>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '28px', fontWeight: 700, color: colors.darkText }}>
+            {step === 1 ? 'Find Your Property' : step === 2 ? 'Review Estimate' : step === 3 ? 'Your Contact Info' : 'Review & Authorize'}
+          </h2>
+          <p style={{ color: colors.gray, marginTop: 0, marginBottom: 0, fontSize: '15px', fontWeight: 500 }}>Step {step} of 4</p>
+        </div>
+
+        {/* Step Indicator */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '32px', alignItems: 'center' }}>
+          {[1, 2, 3, 4].map((s) => (
+            <div key={s} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: '13px',
+                background: step > s ? colors.primary : step === s ? colors.white : colors.grayLight,
+                color: step > s ? colors.white : step === s ? colors.primary : '#9ca3af',
+                border: step === s ? `2px solid ${colors.primary}` : 'none',
+                flexShrink: 0,
+                transition: 'all 0.3s ease'
+              }}>
+                {step > s ? '✓' : s}
+              </div>
+              {s < 4 && (
+                <div style={{
+                  flex: 1,
+                  height: '2px',
+                  background: step > s ? colors.primary : colors.grayLight,
+                  marginLeft: '8px',
+                  transition: 'all 0.3s ease'
+                }} />
+              )}
+            </div>
+          ))}
+        </div>
 
       {/* STEP 1: ADDRESS SEARCH */}
       {step === 1 && (

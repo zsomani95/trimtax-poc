@@ -186,47 +186,80 @@ export default function DashboardPage() {
                   href={`/tracker/${sub.id}`}
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr auto auto',
+                    gridTemplateColumns: 'auto 1fr auto auto',
                     gap: '20px',
+                    alignItems: 'center',
                     background: '#fff',
-                    borderRadius: '8px',
-                    padding: '16px',
+                    borderRadius: '12px',
+                    padding: '20px 24px',
                     textDecoration: 'none',
                     color: '#111827',
                     cursor: 'pointer',
-                    transition: 'box-shadow 0.2s',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+                    border: '1px solid #e5e7eb',
+                    position: 'relative',
+                    overflow: 'hidden'
                   }}
-                  onMouseEnter={(e) => (e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0,0,0,0.2)')}
-                  onMouseLeave={(e) => (e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)')}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.12)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
                 >
+                  {/* Property Icon Background */}
+                  <div style={{
+                    width: '56px',
+                    height: '56px',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '28px',
+                    flexShrink: 0
+                  }}>
+                    🏡
+                  </div>
+
+                  {/* Property Details */}
                   <div>
-                    <p style={{ fontWeight: 'bold', margin: '0 0 6px 0' }}>{sub.propertyAddress}</p>
-                    <p style={{ color: '#666', fontSize: '13px', margin: '0 0 8px 0' }}>
-                      {sub.county} County • CAD: {fmt(sub.cadValue)} → {fmt(sub.arguedValue)}
-                    </p>
-                    <p style={{ color: '#047857', fontWeight: 'bold', fontSize: '13px', margin: 0 }}>
-                      Est. Savings: {fmt(sub.projectedSavings)}
+                    <p style={{ fontWeight: 700, margin: '0 0 8px 0', fontSize: '16px', color: '#111827' }}>{sub.propertyAddress}</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto', gap: '16px', fontSize: '13px', color: '#6b7280' }}>
+                      <span>{sub.county} County</span>
+                      <span>•</span>
+                      <span>CAD: {fmt(sub.cadValue)}</span>
+                    </div>
+                    <p style={{ color: '#059669', fontWeight: 700, fontSize: '14px', margin: '8px 0 0 0' }}>
+                      💰 {fmt(sub.projectedSavings)}/year
                     </p>
                   </div>
+
+                  {/* Status Badge */}
                   <div style={{ textAlign: 'right' }}>
                     <div
                       style={{
                         display: 'inline-block',
                         background: statusInfo.bg,
                         color: statusInfo.text,
-                        padding: '6px 12px',
-                        borderRadius: '4px',
+                        padding: '8px 14px',
+                        borderRadius: '6px',
                         fontSize: '12px',
-                        fontWeight: 'bold',
+                        fontWeight: '600',
+                        letterSpacing: '0.3px',
                       }}
                     >
                       {statusInfo.label}
                     </div>
                   </div>
-                  <div style={{ textAlign: 'right', minWidth: '120px' }}>
-                    <p style={{ color: '#999', fontSize: '12px', margin: '0 0 4px 0' }}>Submitted</p>
-                    <p style={{ color: '#666', fontSize: '12px', margin: 0 }}>
+
+                  {/* Date */}
+                  <div style={{ textAlign: 'right', minWidth: '100px' }}>
+                    <p style={{ color: '#9ca3af', fontSize: '12px', margin: '0 0 4px 0', fontWeight: 500 }}>Submitted</p>
+                    <p style={{ color: '#6b7280', fontSize: '12px', margin: 0, fontWeight: 600 }}>
                       {new Date(sub.createdAt).toLocaleDateString()}
                     </p>
                   </div>
