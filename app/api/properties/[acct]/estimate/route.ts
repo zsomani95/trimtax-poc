@@ -96,8 +96,8 @@ export async function GET(
         : ppsfs.length >= 10 ? 'medium'
           : 'low'
 
-    const savingsMin = Math.round(Math.max(savings, 0) * 0.7)
-    const savingsMax = Math.max(savings, 0)
+    const savingsMin = savings > 0 ? Math.round(savings * 0.7) : 0
+    const savingsMax = savings
 
     return NextResponse.json({
       subject,

@@ -333,8 +333,8 @@ export default function IntakePage() {
                 </div>
                 <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '4px', fontSize: '13px' }}>
                   <p style={{ margin: '0 0 5px 0', color: '#666', fontSize: '12px' }}>Potential Reduction</p>
-                  <p style={{ margin: '0', fontWeight: 'bold', color: estimate.savings_max && estimate.savings_max > 0 ? '#047857' : '#999' }}>
-                    {estimate.savings_max && estimate.savings_max > 0 ? fmt(estimate.savings_max) : '—'}
+                  <p style={{ margin: '0', fontWeight: 'bold', color: estimate.savings && estimate.savings > 0 ? '#047857' : '#999' }}>
+                    {estimate.savings !== undefined ? (estimate.savings > 0 ? fmt(estimate.savings) : '$0') : '—'}
                   </p>
                 </div>
               </div>

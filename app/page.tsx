@@ -154,42 +154,39 @@ export default function HomePage() {
               {showDropdown && results.length > 0 && (
                 <div style={{
                   position: 'absolute',
-                  top: '100%',
+                  top: 'calc(100% + 4px)',
                   left: 0,
                   right: 0,
                   background: '#fff',
                   border: '1px solid #ddd',
-                  borderTop: 'none',
-                  borderRadius: '0 0 8px 8px',
+                  borderRadius: '8px',
                   maxHeight: '300px',
                   overflowY: 'auto',
-                  zIndex: 10,
-                  marginTop: '-8px',
-                  paddingTop: '8px',
+                  zIndex: 100,
+                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
                 }}>
-                  {results.map((property) => (
-                    <button
+                  {results.map((property, idx) => (
+                    <div
                       key={property.acct}
-                      onClick={() => handleSelectProperty(property)}
+                      onClick={() => {
+                        handleSelectProperty(property)
+                        setShowDropdown(false)
+                      }}
                       style={{
-                        width: '100%',
                         padding: '12px 14px',
-                        border: 'none',
-                        background: 'transparent',
-                        textAlign: 'left',
+                        borderBottom: idx < results.length - 1 ? '1px solid #f3f4f6' : 'none',
                         cursor: 'pointer',
                         fontSize: '14px',
                         color: '#1f2937',
-                        borderBottom: '1px solid #f3f4f6',
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = '#f9fafb')}
                       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
                     >
-                      <div style={{ fontWeight: 'bold' }}>{property.site_addr_1}</div>
+                      <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{property.site_addr_1}</div>
                       <div style={{ fontSize: '12px', color: '#666' }}>
                         {property.city}, {property.zip}
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               )}

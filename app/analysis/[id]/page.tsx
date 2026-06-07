@@ -50,11 +50,18 @@ export default async function AnalysisPage({
           <p style={{ color: '#666', fontSize: '14px', margin: '0' }}>{submission.propertyAddress}</p>
         </div>
 
-        <div style={{ background: '#10b981', borderRadius: '12px', padding: '32px', color: '#fff', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
-          <p style={{ margin: '0 0 10px 0', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: '#d1fae5' }}>Potential Tax Reduction</p>
-          <p style={{ margin: '0 0 15px 0', fontSize: '48px', fontWeight: 'bold' }}>{fmt(submission.projectedSavings)}</p>
-          <p style={{ margin: 0, fontSize: '12px', color: '#d1fae5', fontStyle: 'italic' }}>
-            Fee: 25% of total taxes saved (if successful)
+        <div style={{ background: submission.projectedSavings && submission.projectedSavings > 0 ? '#10b981' : '#9ca3af', borderRadius: '12px', padding: '32px', color: '#fff', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
+          <p style={{ margin: '0 0 10px 0', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: submission.projectedSavings && submission.projectedSavings > 0 ? '#d1fae5' : '#f3f4f6' }}>
+            {submission.projectedSavings && submission.projectedSavings > 0 ? 'Potential Tax Reduction' : 'Property Valuation'}
+          </p>
+          <p style={{ margin: '0 0 15px 0', fontSize: '48px', fontWeight: 'bold' }}>
+            {submission.projectedSavings ? fmt(submission.projectedSavings) : '$0'}
+          </p>
+          <p style={{ margin: 0, fontSize: '12px', color: submission.projectedSavings && submission.projectedSavings > 0 ? '#d1fae5' : '#f3f4f6', fontStyle: 'italic' }}>
+            {submission.projectedSavings && submission.projectedSavings > 0
+              ? 'Fee: 25% of total taxes saved (if successful)'
+              : 'Property appears fairly valued based on market comparables'
+            }
           </p>
         </div>
 
