@@ -92,6 +92,9 @@ export default function DashboardPage() {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
           <div>
+            <Link href="/" style={{ textDecoration: 'none', color: '#aaa', marginBottom: '12px', display: 'inline-block', fontSize: '14px' }}>
+              ← Back to Home
+            </Link>
             <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#fff', margin: '0 0 8px 0' }}>TrimTax Dashboard</h1>
             <p style={{ color: '#aaa', margin: 0, fontSize: '14px' }}>Track all your property tax protests</p>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import SignatureCanvas from 'react-signature-canvas'
 
 const colors = {
@@ -116,14 +117,21 @@ export default function SignPageClient({
       : '—'
 
   return (
-    <div style={{ maxWidth: '700px', margin: '0 auto', fontFamily: 'system-ui', padding: '20px' }}>
+    <div>
       <style>{`
         @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
         .loading { animation: pulse 1s infinite; }
       `}</style>
 
-      <h1 style={{ marginTop: 0, marginBottom: '8px' }}>TrimTax</h1>
-      <p style={{ color: '#666', marginTop: 0, marginBottom: '30px' }}>File your property tax protest</p>
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid #eee', marginBottom: '20px' }}>
+        <Link href="/" style={{ textDecoration: 'none', color: '#111827' }}>
+          <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>← TrimTax</h1>
+        </Link>
+      </div>
+
+      <div style={{ maxWidth: '700px', margin: '0 auto', fontFamily: 'system-ui', padding: '0 20px 20px 20px' }}>
+        <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '28px' }}>File Your Protest</h2>
+        <p style={{ color: '#666', marginTop: 0, marginBottom: '30px' }}>Complete e-signature and we'll handle the rest</p>
 
       {/* STEP 1: REVIEW */}
       {step === 1 && (

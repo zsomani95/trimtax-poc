@@ -180,7 +180,7 @@ export default function IntakePage() {
   }
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '20px' }}>
+    <div>
       <style>{`
         @keyframes spin {
           from { transform: rotate(0deg); }
@@ -190,8 +190,17 @@ export default function IntakePage() {
           display: inline-block;
         }
       `}</style>
-      <h1 style={{ marginTop: 0, marginBottom: '8px' }}>TrimTax</h1>
-      <p style={{ color: '#666', marginTop: 0, marginBottom: '30px' }}>Automated Texas property tax protest</p>
+
+      {/* Header */}
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid #eee', marginBottom: '20px' }}>
+        <Link href="/" style={{ textDecoration: 'none', color: '#111827' }}>
+          <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>← TrimTax</h1>
+        </Link>
+      </div>
+
+      <div style={{ maxWidth: '600px', margin: '0 auto', fontFamily: 'system-ui, -apple-system, sans-serif', padding: '0 20px 20px 20px' }}>
+        <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '28px' }}>Find Your Property</h2>
+        <p style={{ color: '#666', marginTop: 0, marginBottom: '30px' }}>Automated Texas property tax protest</p>
 
       {/* STEP 1: ADDRESS SEARCH */}
       {step === 1 && (

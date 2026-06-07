@@ -149,9 +149,14 @@ export default function TrackerPage({
     <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #1e293b, #0f172a)', padding: '20px' }}>
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         {/* Header */}
-        <Link href="/dashboard" style={{ color: '#0066cc', textDecoration: 'none', marginBottom: '20px', display: 'inline-block' }}>
-          ← Dashboard
-        </Link>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+          <Link href="/" style={{ color: '#0066cc', textDecoration: 'none' }}>
+            ← Home
+          </Link>
+          <Link href="/dashboard" style={{ color: '#0066cc', textDecoration: 'none' }}>
+            Dashboard
+          </Link>
+        </div>
 
         <div style={{ background: '#fff', borderRadius: '12px', padding: '30px', marginBottom: '20px' }}>
           <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', margin: '0 0 12px 0' }}>

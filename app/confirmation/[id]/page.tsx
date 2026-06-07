@@ -29,8 +29,16 @@ export default async function ConfirmationPage({
       : '—'
 
   return (
-    <main style={{ minHeight: '100vh', padding: '20px', background: 'linear-gradient(to bottom right, #1e293b, #0f172a)', display: 'flex', alignItems: 'center' }}>
-      <div style={{ maxWidth: '700px', margin: '0 auto', width: '100%' }}>
+    <main style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #1e293b, #0f172a)' }}>
+      {/* Home Link */}
+      <div style={{ padding: '16px 20px', textAlign: 'center' }}>
+        <Link href="/" style={{ color: '#aaa', textDecoration: 'none', fontSize: '14px' }}>
+          ← Back to Home
+        </Link>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', minHeight: 'calc(100vh - 60px)', padding: '20px' }}>
+        <div style={{ maxWidth: '700px', margin: '0 auto', width: '100%' }}>
 
         <div style={{ background: '#fff', borderRadius: '12px', padding: '40px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)', marginBottom: '24px' }}>
           <div style={{ textAlign: 'center', marginBottom: '30px' }}>
@@ -155,6 +163,7 @@ export default async function ConfirmationPage({
           </div>
         </div>
 
+      </div>
       </div>
     </main>
   )
