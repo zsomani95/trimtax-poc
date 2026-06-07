@@ -156,7 +156,7 @@ export default function HomePage() {
           </p>
 
           {/* Search Box */}
-          <div className="search-box" style={{ position: 'relative', marginBottom: '60px' }} ref={dropdownRef}>
+          <div className="search-box" style={{ position: 'relative', marginBottom: '80px', zIndex: 50 }} ref={dropdownRef}>
             <div style={{
               background: colors.white,
               borderRadius: '12px',
@@ -201,7 +201,7 @@ export default function HomePage() {
                   borderRadius: '8px',
                   maxHeight: '320px',
                   overflowY: 'auto',
-                  zIndex: 100,
+                  zIndex: 1000,
                   boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
                 }}>
                   {results.map((property, idx) => (
@@ -245,7 +245,7 @@ export default function HomePage() {
                   color: colors.gray,
                   fontSize: '14px',
                   boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
-                  zIndex: 100,
+                  zIndex: 1000,
                 }}>
                   ⏳ Searching properties...
                 </div>
@@ -265,7 +265,7 @@ export default function HomePage() {
                   color: '#9ca3af',
                   fontSize: '14px',
                   boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
-                  zIndex: 100,
+                  zIndex: 1000,
                 }}>
                   No properties found
                 </div>
@@ -297,7 +297,7 @@ export default function HomePage() {
                 borderRadius: '50%',
                 zIndex: 0
               }} />
-              <div style={{ fontSize: '48px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>📊</div>
+              <div style={{ fontSize: '48px', marginTop: '20px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>📊</div>
               <p style={{ fontWeight: 700, margin: '0 0 8px 0', color: colors.darkText, fontSize: '16px', letterSpacing: '-0.3px' }}>Real Data</p>
               <p style={{ color: colors.gray, fontSize: '14px', margin: 0, lineHeight: 1.5 }}>1.5M verified properties</p>
             </div>
@@ -324,7 +324,7 @@ export default function HomePage() {
                 borderRadius: '50%',
                 zIndex: 0
               }} />
-              <div style={{ fontSize: '48px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>🎯</div>
+              <div style={{ fontSize: '48px', marginTop: '20px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>🎯</div>
               <p style={{ fontWeight: 700, margin: '0 0 8px 0', color: colors.darkText, fontSize: '16px', letterSpacing: '-0.3px' }}>Smart Analysis</p>
               <p style={{ color: colors.gray, fontSize: '14px', margin: 0, lineHeight: 1.5 }}>Instant accurate estimates</p>
             </div>
@@ -351,7 +351,7 @@ export default function HomePage() {
                 borderRadius: '50%',
                 zIndex: 0
               }} />
-              <div style={{ fontSize: '48px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>✍️</div>
+              <div style={{ fontSize: '48px', marginTop: '20px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>✍️</div>
               <p style={{ fontWeight: 700, margin: '0 0 8px 0', color: colors.darkText, fontSize: '16px', letterSpacing: '-0.3px' }}>E-Signature</p>
               <p style={{ color: colors.gray, fontSize: '14px', margin: 0, lineHeight: 1.5 }}>Sign in minutes</p>
             </div>
@@ -378,7 +378,7 @@ export default function HomePage() {
                 borderRadius: '50%',
                 zIndex: 0
               }} />
-              <div style={{ fontSize: '48px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>💰</div>
+              <div style={{ fontSize: '48px', marginTop: '20px', marginBottom: '12px', zIndex: 1, position: 'relative' }}>💰</div>
               <p style={{ fontWeight: 700, margin: '0 0 8px 0', color: colors.darkText, fontSize: '16px', letterSpacing: '-0.3px' }}>Contingency</p>
               <p style={{ color: colors.gray, fontSize: '14px', margin: 0, lineHeight: 1.5 }}>25% only if we win</p>
             </div>
