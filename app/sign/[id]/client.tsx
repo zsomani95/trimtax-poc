@@ -4,6 +4,12 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import SignatureCanvas from 'react-signature-canvas'
 
+const colors = {
+  primary: '#059669', primaryDark: '#047857', dark: '#0f172a',
+  darkText: '#111827', white: '#fff', gray: '#6b7280',
+  grayLight: '#f3f4f6',
+}
+
 interface SignPageClientProps {
   submission: {
     id: number

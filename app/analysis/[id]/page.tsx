@@ -4,6 +4,11 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+const colors = {
+  primary: '#059669', primaryDark: '#047857', darkText: '#111827',
+  white: '#fff', gray: '#6b7280', grayLight: '#f3f4f6',
+};
+
 const fmt = (n: number | null) =>
   n !== null
     ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)

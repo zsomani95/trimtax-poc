@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
+const colors = {
+  primary: '#059669', primaryDark: '#047857', dark: '#0f172a',
+  darkText: '#111827', white: '#fff', gray: '#6b7280',
+  grayLight: '#f3f4f6',
+}
+
 interface Submission {
   id: number
   propertyAddress: string

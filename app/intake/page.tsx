@@ -3,6 +3,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+const colors = {
+  primary: '#059669', primaryDark: '#047857', dark: '#0f172a',
+  darkText: '#111827', white: '#ffffff', gray: '#6b7280',
+  grayLight: '#f3f4f6', error: '#dc2626',
+}
+
 interface Property {
   acct: string
   site_addr_1: string
