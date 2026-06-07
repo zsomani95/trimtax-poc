@@ -245,6 +245,7 @@ export default function HomePage() {
                   color: colors.gray,
                   fontSize: '14px',
                   boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
+                  zIndex: 100,
                 }}>
                   ⏳ Searching properties...
                 </div>
@@ -264,6 +265,7 @@ export default function HomePage() {
                   color: '#9ca3af',
                   fontSize: '14px',
                   boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
+                  zIndex: 100,
                 }}>
                   No properties found
                 </div>
