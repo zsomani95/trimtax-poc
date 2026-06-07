@@ -289,8 +289,8 @@ export default function IntakePage() {
                   onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#f0fdf4')}
                   onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#fff')}
                 >
-                  <strong style={{ display: 'block' }}>{p.site_addr_1}</strong>
-                  <span style={{ color: '#666', fontSize: '13px' }}>
+                  <strong style={{ display: 'block', color: colors.darkText }}>{p.site_addr_1}</strong>
+                  <span style={{ color: colors.gray, fontSize: '13px' }}>
                     {p.city}, TX {p.zip} · {p.county} County
                   </span>
                 </li>
@@ -310,11 +310,11 @@ export default function IntakePage() {
 
       {/* STEP 2: SAVINGS ESTIMATE */}
       {step === 2 && estimate && (
-        <div style={{ border: '1px solid #ddd', padding: '24px', borderRadius: '8px', backgroundColor: '#fff' }}>
-          <h2 style={{ marginTop: 0 }}>Your Savings Estimate</h2>
-          <p style={{ color: '#666', marginBottom: '20px' }}>
-            <strong>{estimate.subject.site_addr_1}</strong><br />
-            {estimate.subject.city}, TX {estimate.subject.zip} · {estimate.subject.county} County
+        <div style={{ border: `1px solid ${colors.grayLight}`, padding: '32px', borderRadius: '12px', backgroundColor: colors.white, boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+          <h2 style={{ marginTop: 0, fontSize: '24px', fontWeight: 700, color: colors.darkText, marginBottom: '12px' }}>Your Savings Estimate</h2>
+          <p style={{ color: colors.darkText, marginBottom: '20px', fontSize: '16px', fontWeight: 500 }}>
+            <strong style={{ color: colors.darkText }}>{estimate.subject.site_addr_1}</strong><br />
+            <span style={{ color: colors.gray, fontSize: '15px' }}>{estimate.subject.city}, TX {estimate.subject.zip} · {estimate.subject.county} County</span>
           </p>
 
           {estimate.no_estimate ? (
@@ -356,7 +356,7 @@ export default function IntakePage() {
                 <h3 style={{ margin: '0 0 5px 0', fontSize: '32px', color: '#047857' }}>
                   Save up to {fmt(estimate.savings_max ?? 0)}
                 </h3>
-                <p style={{ margin: '5px 0 15px 0', color: '#666', fontSize: '13px' }}>
+                <p style={{ margin: '5px 0 15px 0', color: colors.gray, fontSize: '13px', fontWeight: 500 }}>
                   Range: {fmt(estimate.savings_min ?? 0)} – {fmt(estimate.savings_max ?? 0)}
                 </p>
                 <span style={{
@@ -575,7 +575,6 @@ export default function IntakePage() {
               onMouseEnter={(e) => !ownerName.trim() || !ownerEmail.trim() ? null : (e.currentTarget.style.backgroundColor = colors.primaryDark)}
               onMouseLeave={(e) => !ownerName.trim() || !ownerEmail.trim() ? null : (e.currentTarget.style.backgroundColor = colors.primary)}
             >
-            >
               Continue
             </button>
           </div>
@@ -584,67 +583,80 @@ export default function IntakePage() {
 
       {/* STEP 4: REVIEW */}
       {step === 4 && estimate && (
-        <div style={{ border: '1px solid #ddd', padding: '24px', borderRadius: '8px', backgroundColor: '#fff' }}>
-          <h2 style={{ marginTop: 0 }}>Review & Authorize</h2>
+        <div style={{ border: `1px solid ${colors.grayLight}`, padding: '32px', borderRadius: '12px', backgroundColor: colors.white, boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+          <h2 style={{ marginTop: 0, fontSize: '24px', fontWeight: 700, color: colors.darkText, marginBottom: '24px' }}>Review & Authorize</h2>
 
-          <table style={{ width: '100%', marginBottom: '20px', fontSize: '14px', borderCollapse: 'collapse' }}>
+          <table style={{ width: '100%', marginBottom: '24px', fontSize: '15px', borderCollapse: 'collapse' }}>
             <tbody>
-              <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>Property</td>
-                <td style={{ textAlign: 'right', padding: '10px' }}>{estimate.subject.site_addr_1}, {estimate.subject.city}</td>
+              <tr style={{ borderBottom: `1px solid ${colors.grayLight}` }}>
+                <td style={{ padding: '12px 0', fontWeight: 700, color: colors.darkText }}>Property</td>
+                <td style={{ textAlign: 'right', padding: '12px 0', color: colors.darkText }}>{estimate.subject.site_addr_1}, {estimate.subject.city}</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>CAD Account</td>
-                <td style={{ textAlign: 'right', padding: '10px' }}>{estimate.subject.acct}</td>
+              <tr style={{ borderBottom: `1px solid ${colors.grayLight}` }}>
+                <td style={{ padding: '12px 0', fontWeight: 700, color: colors.darkText }}>CAD Account</td>
+                <td style={{ textAlign: 'right', padding: '12px 0', color: colors.darkText }}>{estimate.subject.acct}</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>County</td>
-                <td style={{ textAlign: 'right', padding: '10px' }}>{estimate.subject.county} County</td>
+              <tr style={{ borderBottom: `1px solid ${colors.grayLight}` }}>
+                <td style={{ padding: '12px 0', fontWeight: 700, color: colors.darkText }}>County</td>
+                <td style={{ textAlign: 'right', padding: '12px 0', color: colors.darkText }}>{estimate.subject.county} County</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>Current Value</td>
-                <td style={{ textAlign: 'right', padding: '10px' }}>{fmt(estimate.subject.cur_appr_val)}</td>
+              <tr style={{ borderBottom: `1px solid ${colors.grayLight}` }}>
+                <td style={{ padding: '12px 0', fontWeight: 700, color: colors.darkText }}>Current Value</td>
+                <td style={{ textAlign: 'right', padding: '12px 0', color: colors.darkText }}>{fmt(estimate.subject.cur_appr_val)}</td>
               </tr>
-              <tr style={{ borderBottom: '1px solid #eee', backgroundColor: '#f0fdf4' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold', color: '#047857' }}>Argued Value</td>
-                <td style={{ textAlign: 'right', padding: '10px', fontWeight: 'bold', color: '#047857' }}>{fmt(estimate.argued_value ?? 0)}</td>
+              <tr style={{ borderBottom: `1px solid ${colors.grayLight}`, backgroundColor: '#f0fdf4' }}>
+                <td style={{ padding: '12px 0', fontWeight: 700, color: colors.primaryDark }}>Argued Value</td>
+                <td style={{ textAlign: 'right', padding: '12px 0', fontWeight: 700, color: colors.primaryDark }}>{fmt(estimate.argued_value ?? 0)}</td>
               </tr>
               <tr>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>Owner</td>
-                <td style={{ textAlign: 'right', padding: '10px' }}>{ownerName}</td>
+                <td style={{ padding: '12px 0', fontWeight: 700, color: colors.darkText }}>Owner</td>
+                <td style={{ textAlign: 'right', padding: '12px 0', color: colors.darkText }}>{ownerName}</td>
               </tr>
             </tbody>
           </table>
 
           <div style={{
             backgroundColor: '#dbeafe',
-            border: '1px solid #93c5fd',
-            padding: '15px',
-            borderRadius: '4px',
-            marginBottom: '20px',
-            fontSize: '13px',
-            lineHeight: '1.6',
+            border: `1px solid ${colors.primary}30`,
+            padding: '16px',
+            borderRadius: '8px',
+            marginBottom: '24px',
+            fontSize: '14px',
+            lineHeight: '1.8',
+            color: '#0369a1',
+            fontWeight: 500
           }}>
-            <strong>What happens next:</strong><br />
-            1. TrimTax generates Forms 50-132 &amp; 50-162<br />
-            2. Files with CAD + attends informal hearing<br />
-            3. You're notified of outcome (no action needed)<br />
-            4. If successful, 25% of first-year savings invoiced
+            <strong style={{ display: 'block', marginBottom: '8px' }}>What happens next:</strong>
+            <div>1. TrimTax generates Forms 50-132 &amp; 50-162</div>
+            <div>2. Files with CAD + attends informal hearing</div>
+            <div>3. You're notified of outcome (no action needed)</div>
+            <div>4. If successful, 25% of first-year savings invoiced</div>
           </div>
 
-          {submitError && <p style={{ color: '#d32f2f', marginBottom: '15px' }}>Error: {submitError}</p>}
+          {submitError && <p style={{ color: colors.error, marginBottom: '15px', fontWeight: 500 }}>✗ Error: {submitError}</p>}
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <button
               onClick={() => setStep(3)}
               style={{
                 flex: 1,
-                padding: '12px',
-                backgroundColor: '#fff',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
+                padding: '14px 20px',
+                backgroundColor: colors.white,
+                border: `2px solid ${colors.grayLight}`,
+                borderRadius: '8px',
                 cursor: 'pointer',
-                fontWeight: 'bold',
+                fontWeight: 700,
+                color: colors.darkText,
+                fontSize: '15px',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = colors.primary
+                e.currentTarget.style.color = colors.primary
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = colors.grayLight
+                e.currentTarget.style.color = colors.darkText
               }}
             >
               Back
@@ -654,14 +666,18 @@ export default function IntakePage() {
               disabled={submitting}
               style={{
                 flex: 1,
-                padding: '12px',
-                backgroundColor: submitting ? '#ccc' : '#047857',
-                color: 'white',
+                padding: '14px 20px',
+                backgroundColor: submitting ? '#d1d5db' : colors.primaryDark,
+                color: colors.white,
                 border: 'none',
-                borderRadius: '4px',
+                borderRadius: '8px',
                 cursor: submitting ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold',
+                fontWeight: 700,
+                fontSize: '15px',
+                transition: 'all 0.2s ease',
               }}
+              onMouseEnter={(e) => !submitting && (e.currentTarget.style.backgroundColor = colors.primary)}
+              onMouseLeave={(e) => !submitting && (e.currentTarget.style.backgroundColor = colors.primaryDark)}
             >
               {submitting ? '⏳ Filing...' : 'File My Protest →'}
             </button>
