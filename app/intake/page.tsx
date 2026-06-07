@@ -596,6 +596,7 @@ export default function IntakePage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }
