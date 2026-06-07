@@ -1,32 +1,60 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+
+interface Property {
+  acct: string
+  site_addr_1: string
+  city: string
+  zip: string
+}
 
 export default function HomePage() {
   const router = useRouter()
   const [address, setAddress] = useState('')
+  const [results, setResults] = useState<Property[]>([])
   const [searching, setSearching] = useState(false)
+  const [showDropdown, setShowDropdown] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const handleSearch = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!address.trim()) return
+  const handleInputChange = async (value: string) => {
+    setAddress(value)
+
+    if (!value.trim()) {
+      setResults([])
+      setShowDropdown(false)
+      return
+    }
 
     setSearching(true)
     try {
-      const res = await fetch(`/api/properties/search?q=${encodeURIComponent(address)}`)
+      const res = await fetch(`/api/properties/search?q=${encodeURIComponent(value)}`)
       const data = await res.json()
-
-      if (data.results?.length > 0) {
-        router.push(`/intake?address=${encodeURIComponent(address)}`)
-      }
+      setResults(data.results || [])
+      setShowDropdown(true)
     } catch (err) {
       console.error(err)
+      setResults([])
     } finally {
       setSearching(false)
     }
   }
+
+  const handleSelectProperty = (property: Property) => {
+    router.push(`/intake?acct=${encodeURIComponent(property.acct)}`)
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   return (
     <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)', display: 'flex', flexDirection: 'column' }}>
@@ -90,7 +118,7 @@ export default function HomePage() {
           </p>
 
           {/* Search Box */}
-          <form onSubmit={handleSearch} style={{ display: 'grid', gap: '16px', marginBottom: '40px' }}>
+          <div style={{ display: 'grid', gap: '16px', marginBottom: '40px', position: 'relative' }} ref={dropdownRef}>
             <div style={{
               background: '#fff',
               borderRadius: '12px',
@@ -98,6 +126,7 @@ export default function HomePage() {
               boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
               display: 'grid',
               gap: '12px',
+              position: 'relative',
             }}>
               <label style={{ textAlign: 'left', fontWeight: 'bold', color: '#111827', fontSize: '14px' }}>
                 Enter your property address
@@ -105,7 +134,8 @@ export default function HomePage() {
               <input
                 type="text"
                 value={address}
-                onChange={(e) => setAddress(e.target.value)}
+                onChange={(e) => handleInputChange(e.target.value)}
+                onFocus={() => address.trim() && setShowDropdown(true)}
                 placeholder="e.g., 123 Westheimer Rd, Houston, TX"
                 autoFocus
                 style={{
@@ -119,25 +149,90 @@ export default function HomePage() {
                   backgroundColor: '#fff',
                 }}
               />
-              <button
-                type="submit"
-                disabled={searching || !address.trim()}
-                style={{
-                  background: searching || !address.trim() ? '#ccc' : '#047857',
-                  color: '#fff',
-                  padding: '14px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontWeight: 'bold',
-                  fontSize: '16px',
-                  cursor: searching || !address.trim() ? 'not-allowed' : 'pointer',
-                  transition: 'background 0.2s',
-                }}
-              >
-                {searching ? '⏳ Searching...' : 'Get My Estimate →'}
-              </button>
+
+              {/* Autocomplete Dropdown */}
+              {showDropdown && results.length > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  background: '#fff',
+                  border: '1px solid #ddd',
+                  borderTop: 'none',
+                  borderRadius: '0 0 8px 8px',
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                  zIndex: 10,
+                  marginTop: '-8px',
+                  paddingTop: '8px',
+                }}>
+                  {results.map((property) => (
+                    <button
+                      key={property.acct}
+                      onClick={() => handleSelectProperty(property)}
+                      style={{
+                        width: '100%',
+                        padding: '12px 14px',
+                        border: 'none',
+                        background: 'transparent',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        color: '#1f2937',
+                        borderBottom: '1px solid #f3f4f6',
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = '#f9fafb')}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                    >
+                      <div style={{ fontWeight: 'bold' }}>{property.site_addr_1}</div>
+                      <div style={{ fontSize: '12px', color: '#666' }}>
+                        {property.city}, {property.zip}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {showDropdown && searching && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  background: '#fff',
+                  border: '1px solid #ddd',
+                  borderTop: 'none',
+                  borderRadius: '0 0 8px 8px',
+                  padding: '12px 14px',
+                  textAlign: 'center',
+                  color: '#666',
+                  fontSize: '14px',
+                }}>
+                  ⏳ Searching...
+                </div>
+              )}
+
+              {showDropdown && !searching && results.length === 0 && address.trim() && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  background: '#fff',
+                  border: '1px solid #ddd',
+                  borderTop: 'none',
+                  borderRadius: '0 0 8px 8px',
+                  padding: '12px 14px',
+                  textAlign: 'center',
+                  color: '#999',
+                  fontSize: '14px',
+                }}>
+                  No properties found
+                </div>
+              )}
             </div>
-          </form>
+          </div>
 
           {/* Features */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>

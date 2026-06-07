@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface Property {
   acct: string
@@ -37,6 +37,7 @@ const fmt = (n: number) =>
 
 export default function IntakePage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [step, setStep] = useState(1)
 
   const [query, setQuery] = useState('')
@@ -79,6 +80,29 @@ export default function IntakePage() {
       setSearching(false)
     }
   }, [])
+
+  // Load pre-selected property from URL params
+  useEffect(() => {
+    const acct = searchParams.get('acct')
+    if (acct) {
+      setLoadingEst(true)
+      setEstimateError('')
+      fetch(`/api/properties/${encodeURIComponent(acct)}/estimate`)
+        .then(res => res.json())
+        .then((data: Estimate) => {
+          if (data.error) {
+            setEstimateError(data.error)
+          } else {
+            setEstimate(data)
+            setQuery(`${data.subject.site_addr_1}, ${data.subject.city}`)
+            setOwnerName(data.subject.owner_name ?? '')
+            setStep(2)
+          }
+        })
+        .catch(err => setEstimateError(String(err)))
+        .finally(() => setLoadingEst(false))
+    }
+  }, [searchParams])
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
