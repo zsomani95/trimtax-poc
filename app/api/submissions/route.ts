@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { submissions } from "@/lib/db/schema";
+import { sendSubmissionConfirmation } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,9 +31,16 @@ export async function POST(req: NextRequest) {
         cadValue: cad_value,
         arguedValue: argued_value,
         projectedSavings: projected_savings,
-        status: status ?? "new",
+        status: status ?? "pending",
       })
       .returning();
+
+    await sendSubmissionConfirmation(owner_email, {
+      id: submission.id,
+      propertyAddress: property_address,
+      arguedValue: argued_value,
+      projectedSavings: projected_savings,
+    });
 
     return NextResponse.json({ id: submission.id });
   } catch (error) {
