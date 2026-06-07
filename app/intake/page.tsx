@@ -449,12 +449,12 @@ export default function IntakePage() {
 
       {/* STEP 3: CONTACT INFO */}
       {step === 3 && (
-        <div style={{ border: '1px solid #ddd', padding: '24px', borderRadius: '8px', backgroundColor: '#fff' }}>
-          <h2 style={{ marginTop: 0 }}>Your Contact Info</h2>
-          <p style={{ color: '#666' }}>Needed to file and send results</p>
+        <div style={{ border: `1px solid ${colors.grayLight}`, padding: '32px', borderRadius: '12px', backgroundColor: colors.white, boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
+          <h2 style={{ marginTop: 0, fontSize: '24px', fontWeight: 700, color: colors.darkText, marginBottom: '12px' }}>Your Contact Info</h2>
+          <p style={{ color: colors.gray, fontSize: '16px', fontWeight: 500, marginTop: 0, marginBottom: '28px' }}>Required to file and send updates</p>
 
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '15px', color: colors.darkText, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
               Full Name
             </label>
             <input
@@ -464,18 +464,24 @@ export default function IntakePage() {
               placeholder="As it appears on tax records"
               style={{
                 width: '100%',
-                padding: '10px',
-                fontSize: '14px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
+                padding: '12px 14px',
+                fontSize: '16px',
+                fontWeight: 500,
+                border: `2px solid ${colors.grayLight}`,
+                borderRadius: '8px',
                 boxSizing: 'border-box',
+                color: colors.darkText,
+                backgroundColor: colors.white,
+                transition: 'all 0.2s ease',
               }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = colors.primary)}
+              onBlur={(e) => (e.currentTarget.style.borderColor = colors.grayLight)}
             />
           </div>
 
-          <div style={{ marginBottom: '15px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
-              Email <span style={{ color: '#d32f2f' }}>*</span>
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '15px', color: colors.darkText, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
+              Email <span style={{ color: colors.error, fontSize: '16px' }}>*</span>
             </label>
             <input
               type="email"
@@ -484,17 +490,23 @@ export default function IntakePage() {
               placeholder="you@example.com"
               style={{
                 width: '100%',
-                padding: '10px',
-                fontSize: '14px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
+                padding: '12px 14px',
+                fontSize: '16px',
+                fontWeight: 500,
+                border: `2px solid ${colors.grayLight}`,
+                borderRadius: '8px',
                 boxSizing: 'border-box',
+                color: colors.darkText,
+                backgroundColor: colors.white,
+                transition: 'all 0.2s ease',
               }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = colors.primary)}
+              onBlur={(e) => (e.currentTarget.style.borderColor = colors.grayLight)}
             />
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', fontSize: '14px' }}>
+          <div style={{ marginBottom: '28px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 700, fontSize: '15px', color: colors.darkText, letterSpacing: '0.3px', textTransform: 'uppercase' }}>
               Phone (optional)
             </label>
             <input
@@ -504,26 +516,43 @@ export default function IntakePage() {
               placeholder="(713) 555-0100"
               style={{
                 width: '100%',
-                padding: '10px',
-                fontSize: '14px',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
+                padding: '12px 14px',
+                fontSize: '16px',
+                fontWeight: 500,
+                border: `2px solid ${colors.grayLight}`,
+                borderRadius: '8px',
                 boxSizing: 'border-box',
+                color: colors.darkText,
+                backgroundColor: colors.white,
+                transition: 'all 0.2s ease',
               }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = colors.primary)}
+              onBlur={(e) => (e.currentTarget.style.borderColor = colors.grayLight)}
             />
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '12px' }}>
             <button
               onClick={() => setStep(2)}
               style={{
                 flex: 1,
-                padding: '12px',
-                backgroundColor: '#fff',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
+                padding: '14px 20px',
+                backgroundColor: colors.white,
+                border: `2px solid ${colors.grayLight}`,
+                borderRadius: '8px',
                 cursor: 'pointer',
-                fontWeight: 'bold',
+                fontWeight: 700,
+                color: colors.darkText,
+                fontSize: '15px',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = colors.primary
+                e.currentTarget.style.color = colors.primary
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = colors.grayLight
+                e.currentTarget.style.color = colors.darkText
               }}
             >
               Back
@@ -533,15 +562,19 @@ export default function IntakePage() {
               disabled={!ownerName.trim() || !ownerEmail.trim()}
               style={{
                 flex: 1,
-                padding: '12px',
-                backgroundColor: '#0066cc',
-                color: 'white',
+                padding: '14px 20px',
+                backgroundColor: !ownerName.trim() || !ownerEmail.trim() ? '#d1d5db' : colors.primary,
+                color: colors.white,
                 border: 'none',
-                borderRadius: '4px',
+                borderRadius: '8px',
                 cursor: !ownerName.trim() || !ownerEmail.trim() ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold',
-                opacity: !ownerName.trim() || !ownerEmail.trim() ? 0.5 : 1,
+                fontWeight: 700,
+                fontSize: '15px',
+                transition: 'all 0.2s ease',
               }}
+              onMouseEnter={(e) => !ownerName.trim() || !ownerEmail.trim() ? null : (e.currentTarget.style.backgroundColor = colors.primaryDark)}
+              onMouseLeave={(e) => !ownerName.trim() || !ownerEmail.trim() ? null : (e.currentTarget.style.backgroundColor = colors.primary)}
+            >
             >
               Continue
             </button>
