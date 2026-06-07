@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TrimTax — Component Lego Map</title>
+<style>
+/* ─── Reset & base ─── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:#1a1f2e;
+  font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+  color:#e2e8f0;
+  min-height:100vh;
+}
+
+/* ─── Page header ─── */
+.page-header{
+  text-align:center;
+  padding:40px 24px 0;
+}
+.page-header h1{
+  font-size:2.1rem;font-weight:800;letter-spacing:-0.5px;
+  background:linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.page-header p{color:#94a3b8;font-size:0.88rem;margin-top:6px}
+.stats-row{
+  display:flex;gap:16px;justify-content:center;flex-wrap:wrap;
+  margin:20px 0 0;
+}
+.stat-pill{
+  background:#252d3d;border:1px solid #334155;border-radius:20px;
+  padding:5px 14px;font-size:0.75rem;color:#94a3b8;
+}
+.stat-pill strong{color:#e2e8f0}
+
+/* ─── Tab bar ─── */
+.tab-bar{
+  display:flex;gap:4px;justify-content:center;flex-wrap:wrap;
+  padding:28px 24px 0;
+  position:sticky;top:0;z-index:100;
+  background:linear-gradient(to bottom,#1a1f2e 85%,transparent);
+  padding-bottom:16px;
+}
+.tab-btn{
+  padding:8px 20px;border-radius:8px;border:none;cursor:pointer;
+  font-size:0.82rem;font-weight:600;transition:all 0.15s;
+  background:#252d3d;color:#94a3b8;
+  display:flex;align-items:center;gap:6px;
+}
+.tab-btn:hover{background:#2d3748;color:#e2e8f0}
+.tab-btn.active{background:#3b82f6;color:#fff;box-shadow:0 4px 12px rgba(59,130,246,0.4)}
+.tab-icon{font-size:0.9rem}
+
+/* ─── Tab content ─── */
+.tab-pane{display:none;padding:28px 24px 64px}
+.tab-pane.active{display:block}
+
+/* ─── Section within a tab ─── */
+.section{margin-bottom:40px}
+.section-title{
+  font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:#64748b;margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-title::after{content:'';flex:1;height:1px;background:#1e2a3a}
+
+/* ─── LEGO BRICK ─── */
+.brick{
+  display:inline-flex;flex-direction:column;
+  border-radius:8px 8px 6px 6px;
+  position:relative;
+  transition:transform 0.18s,box-shadow 0.18s;
+  cursor:default;
+  min-width:0;
+  /* bottom ledge = 3D depth */
+  box-shadow:0 6px 0 var(--bd),0 8px 24px rgba(0,0,0,0.35);
+}
+.brick:hover{
+  transform:translateY(-5px);
+  box-shadow:0 11px 0 var(--bd),0 14px 32px rgba(0,0,0,0.45);
+}
+/* stud bar */
+.brick-studs{
+  background:var(--bh);
+  border-radius:7px 7px 0 0;
+  padding:7px 12px 5px;
+  display:flex;gap:7px;align-items:center;
+  min-height:28px;
+}
+.stud{
+  width:16px;height:16px;border-radius:50%;flex-shrink:0;
+  background:var(--bb);
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.25);
+}
+/* face */
+.brick-face{
+  background:var(--bb);
+  border-radius:0 0 6px 6px;
+  padding:10px 14px 13px;
+  color:#fff;
+  flex:1;
+}
+.brick-name{
+  font-size:0.82rem;font-weight:700;line-height:1.2;margin-bottom:3px;
+}
+.brick-route{
+  font-size:0.62rem;font-family:'Cascadia Code','Fira Code',monospace;
+  background:rgba(0,0,0,0.25);border-radius:3px;
+  padding:1px 5px;display:inline-block;margin-bottom:5px;color:rgba(255,255,255,0.85);
+}
+.brick-desc{
+  font-size:0.66rem;color:rgba(255,255,255,0.75);line-height:1.45;
+}
+.brick-tags{
+  display:flex;flex-wrap:wrap;gap:4px;margin-top:7px;
+}
+.tag{
+  font-size:0.58rem;font-weight:600;padding:2px 6px;border-radius:4px;
+  background:rgba(0,0,0,0.25);color:rgba(255,255,255,0.85);
+}
+.tag.light{background:rgba(255,255,255,0.18)}
+
+/* ─── Brick color palettes ─── */
+/* Blue - Frontend */
+.b-blue{--bh:#60a5fa;--bb:#2563eb;--bd:#1d4ed8}
+/* Cyan - pages (sub-type) */
+.b-cyan{--bh:#67e8f9;--bb:#0891b2;--bd:#0e7490}
+/* Green - API */
+.b-green{--bh:#4ade80;--bb:#16a34a;--bd:#15803d}
+/* Teal - GET routes */
+.b-teal{--bh:#2dd4bf;--bb:#0d9488;--bd:#0f766e}
+/* Orange - Database */
+.b-orange{--bh:#fb923c;--bb:#ea580c;--bd:#c2410c}
+/* Amber - DB tables */
+.b-amber{--bh:#fbbf24;--bb:#d97706;--bd:#b45309}
+/* Purple - External */
+.b-purple{--bh:#c084fc;--bb:#9333ea;--bd:#7e22ce}
+/* Pink - Pipeline */
+.b-pink{--bh:#f472b6;--bb:#db2777;--bd:#be185d}
+/* Rose - scripts */
+.b-rose{--bh:#fb7185;--bb:#e11d48;--bd:#be123c}
+/* Slate - Util */
+.b-slate{--bh:#94a3b8;--bb:#475569;--bd:#334155}
+/* Lime - Auth */
+.b-lime{--bh:#a3e635;--bb:#65a30d;--bd:#4d7c0f}
+/* Indigo - POST */
+.b-indigo{--bh:#818cf8;--bb:#4f46e5;--bd:#4338ca}
+/* Violet - PATCH */
+.b-violet{--bh:#a78bfa;--bb:#7c3aed;--bd:#6d28d9}
+
+/* ─── Brick grid layouts ─── */
+.brick-grid{
+  display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;
+}
+.brick-grid.dense{gap:12px}
+
+/* ─── Layer bands (overview) ─── */
+.layer-band{
+  background:#1e2535;border:1px solid #2a3448;
+  border-radius:12px;padding:20px 22px;margin-bottom:0;
+}
+.layer-band-title{
+  font-size:0.7rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+}
+.layer-band-title .dot{
+  width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block;
+}
+.layer-connector{
+  display:flex;flex-direction:column;align-items:center;
+  padding:10px 0;gap:2px;
+}
+.connector-line{
+  width:2px;height:28px;background:linear-gradient(to bottom,#3b82f6,#2563eb);
+  border-radius:1px;
+}
+.connector-label{
+  font-size:0.62rem;color:#3b82f6;font-weight:600;
+  background:#1a1f2e;padding:2px 10px;border-radius:10px;
+  border:1px solid #2d3f5e;text-align:center;
+}
+
+/* ─── DB schema card ─── */
+.schema-card{
+  background:#1e2535;border:1.5px solid var(--bd);border-radius:10px;
+  overflow:hidden;min-width:240px;
+}
+.schema-header{
+  background:var(--bb);padding:12px 16px;
+  font-size:0.8rem;font-weight:700;color:#fff;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.schema-rows{padding:8px 0}
+.schema-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:4px 14px;border-bottom:1px solid rgba(255,255,255,0.04);
+  font-size:0.65rem;
+}
+.schema-row:last-child{border-bottom:none}
+.col-n{font-family:monospace;color:#e2e8f0}
+.col-t{color:#64748b;font-family:monospace}
+.col-pk{color:#fbbf24;font-size:0.58rem;font-weight:700;background:rgba(251,191,36,0.12);padding:1px 5px;border-radius:3px}
+.col-fk{color:#c084fc;font-size:0.58rem;font-weight:700;background:rgba(192,132,252,0.12);padding:1px 5px;border-radius:3px}
+.col-idx{color:#4ade80;font-size:0.58rem;font-weight:700;background:rgba(74,222,128,0.12);padding:1px 5px;border-radius:3px}
+
+/* ─── Tech card ─── */
+.tech-category{
+  background:#1e2535;border:1px solid #2a3448;
+  border-radius:10px;padding:16px;min-width:200px;flex:1;
+}
+.tech-cat-title{
+  font-size:0.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.tech-row{
+  display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;
+}
+.tech-row:last-child{margin-bottom:0}
+.tech-icon{
+  width:32px;height:32px;border-radius:7px;display:flex;align-items:center;
+  justify-content:center;font-size:1.1rem;flex-shrink:0;
+}
+.tech-name{font-size:0.78rem;font-weight:700;color:#e2e8f0}
+.tech-ver{font-size:0.62rem;color:#64748b;font-family:monospace}
+.tech-role{font-size:0.66rem;color:#94a3b8;margin-top:1px}
+
+/* ─── Pipeline flow ─── */
+.pipeline-flow{
+  display:flex;align-items:center;gap:0;flex-wrap:nowrap;overflow-x:auto;padding-bottom:8px;
+}
+.pipe-arrow{
+  display:flex;flex-direction:column;align-items:center;
+  padding:0 8px;flex-shrink:0;
+}
+.pipe-arrow svg{display:block}
+.pipe-arrow span{font-size:0.6rem;color:#db2777;font-weight:600;margin-top:2px;text-align:center;max-width:70px;line-height:1.2}
+.pipe-file{
+  background:#1e2535;border:1px solid #2a3448;border-radius:8px;
+  padding:10px 14px;font-size:0.7rem;color:#94a3b8;
+  min-width:140px;text-align:center;flex-shrink:0;
+}
+.pipe-file strong{display:block;color:#e2e8f0;margin-bottom:2px}
+.pipe-file span{font-family:monospace;font-size:0.62rem}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:#1a1f2e}
+::-webkit-scrollbar-thumb{background:#334155;border-radius:3px}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<div class="page-header">
+  <h1>TrimTax — Component Map</h1>
+  <p>Every piece of the system, assembled like lego</p>
+  <div class="stats-row">
+    <div class="stat-pill"><strong>9</strong> pages</div>
+    <div class="stat-pill"><strong>10</strong> API routes</div>
+    <div class="stat-pill"><strong>4</strong> DB tables</div>
+    <div class="stat-pill"><strong>1,516,324</strong> properties</div>
+    <div class="stat-pill"><strong>308 MB</strong> live data</div>
+    <div class="stat-pill"><strong>14</strong> npm packages</div>
+  </div>
+</div>
+
+<!-- ═══ TAB BAR ═══ -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="overview"><span class="tab-icon">🗺</span> System Overview</button>
+  <button class="tab-btn" data-tab="frontend"><span class="tab-icon">🖥</span> Frontend</button>
+  <button class="tab-btn" data-tab="api"><span class="tab-icon">⚡</span> API Routes</button>
+  <button class="tab-btn" data-tab="database"><span class="tab-icon">🗄</span> Database</button>
+  <button class="tab-btn" data-tab="stack"><span class="tab-icon">📦</span> Tech Stack</button>
+  <button class="tab-btn" data-tab="pipeline"><span class="tab-icon">🔄</span> Data Pipeline</button>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════
+     TAB 1 — SYSTEM OVERVIEW
+══════════════════════════════════════════════════ -->
+<div id="tab-overview" class="tab-pane active">
+
+  <div style="max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:0">
+
+    <!-- User -->
+    <div style="text-align:center;padding:8px 0">
+      <div style="display:inline-flex;align-items:center;gap:8px;background:#252d3d;border:1px solid #334155;border-radius:10px;padding:10px 20px">
+        <span style="font-size:1.4rem">🏠</span>
+        <div style="text-align:left">
+          <div style="font-weight:700;font-size:0.82rem">Texas Homeowner</div>
+          <div style="font-size:0.65rem;color:#64748b">types address → authorizes TrimTax → pays 25% of savings won</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="layer-connector">
+      <div class="connector-line"></div>
+      <div class="connector-label">HTTPS browser</div>
+      <div class="connector-line"></div>
+    </div>
+
+    <!-- Frontend layer -->
+    <div class="layer-band">
+      <div class="layer-band-title" style="color:#60a5fa"><span class="dot"></span>Frontend — Next.js 15 App Router</div>
+      <div class="brick-grid dense">
+
+        <div class="brick b-blue">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Home</div>
+            <div class="brick-route">/</div>
+            <div class="brick-desc">Landing page</div>
+          </div>
+        </div>
+
+        <div class="brick b-blue">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Intake Wizard</div>
+            <div class="brick-route">/intake</div>
+            <div class="brick-desc">4-step: search → estimate → contact → review</div>
+            <div class="brick-tags"><span class="tag">client</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-blue">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Analysis</div>
+            <div class="brick-route">/analysis/[id]</div>
+            <div class="brick-desc">Savings breakdown</div>
+            <div class="brick-tags"><span class="tag">SSR</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-blue">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Sign & PDF</div>
+            <div class="brick-route">/sign/[id]</div>
+            <div class="brick-desc">3-step: review → e-sig → generate PDFs</div>
+            <div class="brick-tags"><span class="tag">SSR+client</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-blue">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Confirmation</div>
+            <div class="brick-route">/confirmation/[id]</div>
+            <div class="brick-desc">Filing success + next steps</div>
+            <div class="brick-tags"><span class="tag">SSR</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-blue">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Tracker</div>
+            <div class="brick-route">/tracker/[id]</div>
+            <div class="brick-desc">5-step timeline + notes</div>
+            <div class="brick-tags"><span class="tag">auth</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-blue">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Dashboard</div>
+            <div class="brick-route">/dashboard</div>
+            <div class="brick-desc">All submissions, stats</div>
+            <div class="brick-tags"><span class="tag">auth</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-cyan">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Login</div>
+            <div class="brick-route">/login</div>
+            <div class="brick-desc">Email + password</div>
+          </div>
+        </div>
+
+        <div class="brick b-cyan">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Register</div>
+            <div class="brick-route">/register</div>
+            <div class="brick-desc">Create account</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="layer-connector">
+      <div class="connector-line"></div>
+      <div class="connector-label">fetch() · Bearer token</div>
+      <div class="connector-line"></div>
+    </div>
+
+    <!-- API layer -->
+    <div class="layer-band">
+      <div class="layer-band-title" style="color:#4ade80"><span class="dot"></span>API Routes — Next.js Route Handlers</div>
+      <div class="brick-grid dense">
+
+        <div class="brick b-teal">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Property Search</div>
+            <div class="brick-route">GET /api/properties/search</div>
+            <div class="brick-desc">ILIKE fuzzy match on 1.5M properties</div>
+            <div class="brick-tags"><span class="tag">idx_properties_addr</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-teal">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Savings Estimate</div>
+            <div class="brick-route">GET /api/properties/[acct]/estimate</div>
+            <div class="brick-desc">§41.43 comp engine · Winsorized median $/sqft</div>
+            <div class="brick-tags"><span class="tag">core algo</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-indigo">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Create Submission</div>
+            <div class="brick-route">POST /api/submissions</div>
+            <div class="brick-desc">Save intake data, status=pending</div>
+          </div>
+        </div>
+
+        <div class="brick b-violet">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Update Submission</div>
+            <div class="brick-route">PATCH /api/submissions/[id]</div>
+            <div class="brick-desc">Attach signature + set status=signed</div>
+          </div>
+        </div>
+
+        <div class="brick b-teal">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">User Submissions</div>
+            <div class="brick-route">GET /api/user/submissions</div>
+            <div class="brick-desc">Dashboard feed · auth required</div>
+          </div>
+        </div>
+
+        <div class="brick b-teal">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Tracker Data</div>
+            <div class="brick-route">GET /api/tracker/[id]</div>
+            <div class="brick-desc">Submission + all notes</div>
+          </div>
+        </div>
+
+        <div class="brick b-indigo">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Add Note</div>
+            <div class="brick-route">POST /api/tracker/[id]/notes</div>
+            <div class="brick-desc">Append to tracking_notes</div>
+          </div>
+        </div>
+
+        <div class="brick b-indigo">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Generate PDF</div>
+            <div class="brick-route">POST /api/generate-pdf</div>
+            <div class="brick-desc">Forms 50-132 + 50-162 via pdf-lib</div>
+            <div class="brick-tags"><span class="tag">returns blob</span></div>
+          </div>
+        </div>
+
+        <div class="brick b-teal">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Login</div>
+            <div class="brick-route">POST /api/auth/login</div>
+            <div class="brick-desc">Verify password · return token</div>
+          </div>
+        </div>
+
+        <div class="brick b-indigo">
+          <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+          <div class="brick-face">
+            <div class="brick-name">Register</div>
+            <div class="brick-route">POST /api/auth/register</div>
+            <div class="brick-desc">Hash password · insert users row</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="layer-connector">
+      <div class="connector-line"></div>
+      <div class="connector-label">Drizzle ORM · SQL</div>
+      <div class="connector-line"></div>
+    </div>
+
+    <!-- DB + External side by side -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+      <div class="layer-band">
+        <div class="layer-band-title" style="color:#fb923c"><span class="dot"></span>Database — NeonDB Serverless PostgreSQL</div>
+        <div class="brick-grid dense">
+
+          <div class="brick b-amber">
+            <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+            <div class="brick-face">
+              <div class="brick-name">properties</div>
+              <div class="brick-desc">acct · site_addr_1 · city · zip · owner_name · neighborhood_code · bld_ar · cur_appr_val · prior_appr_val · protested · county</div>
+              <div class="brick-tags"><span class="tag">1,516,324 rows</span><span class="tag">308 MB</span><span class="tag">idx_addr</span></div>
+            </div>
+          </div>
+
+          <div class="brick b-amber">
+            <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+            <div class="brick-face">
+              <div class="brick-name">submissions</div>
+              <div class="brick-desc">id · userId · ownerName · email · phone · address · county · cadValue · arguedValue · savings · status · signatureImage · signedAt · resultedSavings</div>
+              <div class="brick-tags"><span class="tag">protest filings</span></div>
+            </div>
+          </div>
+
+          <div class="brick b-amber">
+            <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+            <div class="brick-face">
+              <div class="brick-name">tracking_notes</div>
+              <div class="brick-desc">id · submissionId · note · noteType · createdAt · createdBy</div>
+              <div class="brick-tags"><span class="tag">audit log</span></div>
+            </div>
+          </div>
+
+          <div class="brick b-amber">
+            <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+            <div class="brick-face">
+              <div class="brick-name">users</div>
+              <div class="brick-desc">id · email · passwordHash · fullName · createdAt · updatedAt</div>
+              <div class="brick-tags"><span class="tag">auth</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="layer-band">
+        <div class="layer-band-title" style="color:#c084fc"><span class="dot"></span>External Services</div>
+        <div class="brick-grid dense">
+
+          <div class="brick b-purple">
+            <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+            <div class="brick-face">
+              <div class="brick-name">NeonDB</div>
+              <div class="brick-desc">Serverless PostgreSQL · 0.5 GB free tier · HTTP driver (no WebSocket)</div>
+              <div class="brick-tags"><span class="tag">@neondatabase/serverless</span></div>
+            </div>
+          </div>
+
+          <div class="brick b-purple">
+            <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+            <div class="brick-face">
+              <div class="brick-name">Nominatim</div>
+              <div class="brick-desc">OSM geocoding · address → lat/lng · free, no API key</div>
+            </div>
+          </div>
+
+          <div class="brick b-purple">
+            <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+            <div class="brick-face">
+              <div class="brick-name">OpenStreetMap</div>
+              <div class="brick-desc">Map tiles for property location · react-leaflet</div>
+            </div>
+          </div>
+
+          <div class="brick b-purple">
+            <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+            <div class="brick-face">
+              <div class="brick-name">Vercel</div>
+              <div class="brick-desc">Hosting target · trimtax.vercel.app · free tier · Serverless Functions</div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /max-width -->
+</div><!-- /overview -->
+
+
+<!-- ══════════════════════════════════════════════════
+     TAB 2 — FRONTEND
+══════════════════════════════════════════════════ -->
+<div id="tab-frontend" class="tab-pane">
+<div style="max-width:1100px;margin:0 auto">
+
+  <div class="section">
+    <div class="section-title">Main Filing Flow — Client Components</div>
+    <div class="brick-grid">
+
+      <div class="brick b-blue" style="min-width:220px;max-width:260px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Intake Wizard</div>
+          <div class="brick-route">/intake · page.tsx</div>
+          <div class="brick-desc">Step 1: address search (debounced 300ms, 1.5M props)<br>Step 2: savings hero + comp grid<br>Step 3: name / email / phone form<br>Step 4: review table + "File My Protest" CTA</div>
+          <div class="brick-tags">
+            <span class="tag">'use client'</span>
+            <span class="tag">useState×6</span>
+            <span class="tag">useRef</span>
+            <span class="tag">useCallback</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="brick b-blue" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Analysis Page</div>
+          <div class="brick-route">/analysis/[id] · page.tsx</div>
+          <div class="brick-desc">Detailed savings breakdown<br>Comps method footnote<br>CTA → /sign/[id]</div>
+          <div class="brick-tags"><span class="tag">SSR</span></div>
+        </div>
+      </div>
+
+      <div class="brick b-blue" style="min-width:220px;max-width:260px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Sign Page</div>
+          <div class="brick-route">/sign/[id] · page.tsx + client.tsx</div>
+          <div class="brick-desc">Step 1: review submission table + docs list<br>Step 2: react-signature-canvas draw area<br>Step 3: PDF generated → confirm & file</div>
+          <div class="brick-tags">
+            <span class="tag">SSR shell</span>
+            <span class="tag">client inner</span>
+            <span class="tag">useRef</span>
+            <span class="tag">SignatureCanvas</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="brick b-blue" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Confirmation</div>
+          <div class="brick-route">/confirmation/[id] · page.tsx</div>
+          <div class="brick-desc">✅ hero · submission receipt card · 5-step "what's next" list · Submit Another / Return Home buttons</div>
+          <div class="brick-tags"><span class="tag">SSR</span><span class="tag">async server comp</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Post-Filing — Auth Required</div>
+    <div class="brick-grid">
+
+      <div class="brick b-cyan" style="min-width:240px;max-width:300px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Dashboard</div>
+          <div class="brick-route">/dashboard · page.tsx</div>
+          <div class="brick-desc">3 summary stat tiles (properties / savings / resolved)<br>Submission rows: address · county · savings · status badge · date<br>Redirects to /login if no authToken</div>
+          <div class="brick-tags">
+            <span class="tag">'use client'</span>
+            <span class="tag">dark bg gradient</span>
+            <span class="tag">5 status variants</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="brick b-cyan" style="min-width:240px;max-width:300px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Protest Tracker</div>
+          <div class="brick-route">/tracker/[id] · page.tsx</div>
+          <div class="brick-desc">Property card (CAD → argued, savings)<br>5-step timeline: Created → Signed → Submitted → Hearing → Resolved<br>Notes feed + add-note textarea</div>
+          <div class="brick-tags">
+            <span class="tag">'use client'</span>
+            <span class="tag">statusTimeline[]</span>
+            <span class="tag">dark bg</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Auth Pages</div>
+    <div class="brick-grid">
+
+      <div class="brick b-slate" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Login</div>
+          <div class="brick-route">/login · page.tsx</div>
+          <div class="brick-desc">Email + password form<br>Stores btoa token in localStorage<br>→ /dashboard on success<br>?registered=true banner</div>
+          <div class="brick-tags"><span class="tag">'use client'</span><span class="tag">useSearchParams</span></div>
+        </div>
+      </div>
+
+      <div class="brick b-slate" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Register</div>
+          <div class="brick-route">/register · page.tsx</div>
+          <div class="brick-desc">Full name + email + password<br>Inserts into users table<br>→ /login?registered=true</div>
+          <div class="brick-tags"><span class="tag">'use client'</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div><!-- /frontend -->
+
+
+<!-- ══════════════════════════════════════════════════
+     TAB 3 — API ROUTES
+══════════════════════════════════════════════════ -->
+<div id="tab-api" class="tab-pane">
+<div style="max-width:1100px;margin:0 auto">
+
+  <div class="section">
+    <div class="section-title">Property Data — Core Revenue Engine</div>
+    <div class="brick-grid">
+
+      <div class="brick b-teal" style="min-width:240px;max-width:300px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Property Search</div>
+          <div class="brick-route">GET /api/properties/search</div>
+          <div class="brick-desc">Query: ?q=partial_address (min 3 chars)<br>SQL: WHERE site_addr_1 ILIKE '%q%' LIMIT 10<br>Uses idx_properties_addr B-tree index<br>Returns: acct, address, city, zip, county, owner, value, sqft</div>
+          <div class="brick-tags"><span class="tag">1.5M row table</span><span class="tag">debounced 300ms</span></div>
+        </div>
+      </div>
+
+      <div class="brick b-teal" style="min-width:260px;max-width:320px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Savings Estimate</div>
+          <div class="brick-route">GET /api/properties/[acct]/estimate</div>
+          <div class="brick-desc">
+            1. Fetch subject property<br>
+            2. Query neighborhood comps (same neighborhood_code, ±30% sqft)<br>
+            3. Fallback to zip if &lt;5 comps<br>
+            4. Compute $/sqft per comp<br>
+            5. Winsorize at 10th/90th percentile<br>
+            6. Median $/sqft × subject sqft = arguedValue<br>
+            7. Confidence: comp count + CV + overage%
+          </div>
+          <div class="brick-tags"><span class="tag">§41.43</span><span class="tag">Winsorization</span><span class="tag">low/med/high confidence</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Submission Lifecycle</div>
+    <div class="brick-grid">
+
+      <div class="brick b-indigo" style="min-width:220px;max-width:260px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Create Submission</div>
+          <div class="brick-route">POST /api/submissions</div>
+          <div class="brick-desc">Body: owner info, property, cadValue, arguedValue, savings<br>Inserts into submissions, status=pending<br>Returns: { id } → redirect to /analysis/[id]</div>
+          <div class="brick-tags"><span class="tag">DB write</span><span class="tag">optional auth</span></div>
+        </div>
+      </div>
+
+      <div class="brick b-violet" style="min-width:220px;max-width:260px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Update Submission</div>
+          <div class="brick-route">PATCH /api/submissions/[id]</div>
+          <div class="brick-desc">Used at sign step 3<br>Stores: signatureImage (base64 PNG), signedAt, status=signed</div>
+          <div class="brick-tags"><span class="tag">DB write</span></div>
+        </div>
+      </div>
+
+      <div class="brick b-teal" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">User Submissions</div>
+          <div class="brick-route">GET /api/user/submissions</div>
+          <div class="brick-desc">Decode Bearer token → email → userId<br>Returns all submissions for that user<br>Powers dashboard card list</div>
+          <div class="brick-tags"><span class="tag">auth required</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Tracking & Notes</div>
+    <div class="brick-grid">
+
+      <div class="brick b-teal" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Tracker Data</div>
+          <div class="brick-route">GET /api/tracker/[id]</div>
+          <div class="brick-desc">Joins submission + tracking_notes<br>Returns: { submission, notes[] }<br>Notes sorted newest first</div>
+          <div class="brick-tags"><span class="tag">auth required</span></div>
+        </div>
+      </div>
+
+      <div class="brick b-indigo" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Add Tracker Note</div>
+          <div class="brick-route">POST /api/tracker/[id]/notes</div>
+          <div class="brick-desc">Inserts into tracking_notes<br>noteType: "user_note" | "status_update" | "hearing_notice" | "result"<br>createdBy: user email or "system"</div>
+          <div class="brick-tags"><span class="tag">auth required</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">PDF Generation</div>
+    <div class="brick-grid">
+
+      <div class="brick b-indigo" style="min-width:260px;max-width:320px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Generate PDF</div>
+          <div class="brick-route">POST /api/generate-pdf</div>
+          <div class="brick-desc">Body: submissionId, signature (base64 PNG), submission data<br>Creates PDFDocument via pdf-lib<br>Page 1: Form 50-132 (Property Value Protest, §41.41)<br>Page 2: Form 50-162 (Designated Agent Authorization)<br>Fills: owner, address, county, CAD value, argued value, signature<br>Returns: application/pdf download blob</div>
+          <div class="brick-tags"><span class="tag">pdf-lib</span><span class="tag">no auth</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Auth — Demo Mode</div>
+    <div class="brick-grid">
+
+      <div class="brick b-slate" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Login</div>
+          <div class="brick-route">POST /api/auth/login</div>
+          <div class="brick-desc">Lookup user by email<br>Verify bcrypt hash<br>Return: btoa(email + ":" + timestamp)<br>⚠ Not production-safe</div>
+          <div class="brick-tags"><span class="tag light">demo</span></div>
+        </div>
+      </div>
+
+      <div class="brick b-slate" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Register</div>
+          <div class="brick-route">POST /api/auth/register</div>
+          <div class="brick-desc">Hash password (bcrypt)<br>Insert into users table<br>Return 201 on success</div>
+          <div class="brick-tags"><span class="tag light">demo</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</div><!-- /api -->
+
+
+<!-- ══════════════════════════════════════════════════
+     TAB 4 — DATABASE
+══════════════════════════════════════════════════ -->
+<div id="tab-database" class="tab-pane">
+<div style="max-width:1100px;margin:0 auto">
+
+  <div class="section">
+    <div class="section-title">NeonDB — Serverless PostgreSQL · 308 MB live</div>
+    <div style="display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start">
+
+      <!-- properties -->
+      <div class="schema-card b-amber" style="flex:1;min-width:260px">
+        <div class="schema-header">
+          properties
+          <span style="font-size:0.65rem;font-weight:400;opacity:0.85">1,516,324 rows · 308 MB</span>
+        </div>
+        <div class="schema-rows">
+          <div class="schema-row"><span class="col-n">acct</span><span class="col-t">TEXT</span><span class="col-pk">PK</span></div>
+          <div class="schema-row"><span class="col-n">site_addr_1</span><span class="col-t">TEXT</span><span class="col-idx">IDX</span></div>
+          <div class="schema-row"><span class="col-n">city</span><span class="col-t">TEXT</span><span></span></div>
+          <div class="schema-row"><span class="col-n">zip</span><span class="col-t">TEXT</span><span></span></div>
+          <div class="schema-row"><span class="col-n">owner_name</span><span class="col-t">TEXT</span><span></span></div>
+          <div class="schema-row"><span class="col-n">neighborhood_code</span><span class="col-t">TEXT</span><span style="font-size:0.58rem;color:#f59e0b">comp key</span></div>
+          <div class="schema-row"><span class="col-n">bld_ar</span><span class="col-t">INTEGER</span><span style="font-size:0.58rem;color:#64748b">sqft</span></div>
+          <div class="schema-row"><span class="col-n">cur_appr_val</span><span class="col-t">INTEGER</span><span></span></div>
+          <div class="schema-row"><span class="col-n">prior_appr_val</span><span class="col-t">INTEGER</span><span style="font-size:0.58rem;color:#f59e0b">NULL=FBCAD</span></div>
+          <div class="schema-row"><span class="col-n">protested</span><span class="col-t">TEXT</span><span></span></div>
+          <div class="schema-row"><span class="col-n">county</span><span class="col-t">TEXT</span><span style="font-size:0.58rem;color:#64748b">Harris/Fort Bend</span></div>
+        </div>
+        <div style="padding:8px 14px;border-top:1px solid rgba(255,255,255,0.08);font-size:0.62rem;color:#94a3b8">
+          Harris: 1,111,467 rows · Fort Bend: 404,857 rows<br>
+          Created via Neon SQL Editor (drizzle-kit broken)
+        </div>
+      </div>
+
+      <!-- submissions -->
+      <div class="schema-card b-amber" style="flex:1;min-width:260px">
+        <div class="schema-header">
+          submissions
+          <span style="font-size:0.65rem;font-weight:400;opacity:0.85">one row per protest filing</span>
+        </div>
+        <div class="schema-rows">
+          <div class="schema-row"><span class="col-n">id</span><span class="col-t">serial</span><span class="col-pk">PK</span></div>
+          <div class="schema-row"><span class="col-n">userId</span><span class="col-t">integer</span><span class="col-fk">FK</span></div>
+          <div class="schema-row"><span class="col-n">createdAt</span><span class="col-t">timestamp</span><span></span></div>
+          <div class="schema-row"><span class="col-n">ownerName</span><span class="col-t">text NOT NULL</span><span></span></div>
+          <div class="schema-row"><span class="col-n">ownerEmail</span><span class="col-t">text NOT NULL</span><span></span></div>
+          <div class="schema-row"><span class="col-n">ownerPhone</span><span class="col-t">text</span><span></span></div>
+          <div class="schema-row"><span class="col-n">propertyAddress</span><span class="col-t">text NOT NULL</span><span></span></div>
+          <div class="schema-row"><span class="col-n">county</span><span class="col-t">text NOT NULL</span><span></span></div>
+          <div class="schema-row"><span class="col-n">cadAccountNumber</span><span class="col-t">text NOT NULL</span><span></span></div>
+          <div class="schema-row"><span class="col-n">cadValue</span><span class="col-t">integer</span><span></span></div>
+          <div class="schema-row"><span class="col-n">arguedValue</span><span class="col-t">integer</span><span></span></div>
+          <div class="schema-row"><span class="col-n">projectedSavings</span><span class="col-t">integer</span><span></span></div>
+          <div class="schema-row"><span class="col-n">status</span><span class="col-t">text</span><span style="font-size:0.57rem;color:#fbbf24">default: pending</span></div>
+          <div class="schema-row"><span class="col-n">signatureImage</span><span class="col-t">text</span><span style="font-size:0.58rem;color:#64748b">base64 PNG</span></div>
+          <div class="schema-row"><span class="col-n">signedAt</span><span class="col-t">timestamp</span><span></span></div>
+          <div class="schema-row"><span class="col-n">submittedAt</span><span class="col-t">timestamp</span><span></span></div>
+          <div class="schema-row"><span class="col-n">hearingScheduledAt</span><span class="col-t">timestamp</span><span></span></div>
+          <div class="schema-row"><span class="col-n">hearingDate</span><span class="col-t">timestamp</span><span></span></div>
+          <div class="schema-row"><span class="col-n">resultedAt</span><span class="col-t">timestamp</span><span></span></div>
+          <div class="schema-row"><span class="col-n">resultedSavings</span><span class="col-t">integer</span><span></span></div>
+        </div>
+        <div style="padding:8px 14px;border-top:1px solid rgba(255,255,255,0.08);font-size:0.62rem;color:#94a3b8">
+          Status lifecycle: pending → signed → submitted → hearing_scheduled → resolved
+        </div>
+      </div>
+
+      <!-- tracking_notes + users -->
+      <div style="display:flex;flex-direction:column;gap:20px;flex:1;min-width:220px">
+
+        <div class="schema-card b-amber">
+          <div class="schema-header">tracking_notes <span style="font-size:0.65rem;font-weight:400;opacity:0.85">append-only log</span></div>
+          <div class="schema-rows">
+            <div class="schema-row"><span class="col-n">id</span><span class="col-t">serial</span><span class="col-pk">PK</span></div>
+            <div class="schema-row"><span class="col-n">submissionId</span><span class="col-t">integer NOT NULL</span><span class="col-fk">FK</span></div>
+            <div class="schema-row"><span class="col-n">note</span><span class="col-t">text NOT NULL</span><span></span></div>
+            <div class="schema-row"><span class="col-n">noteType</span><span class="col-t">text</span><span></span></div>
+            <div class="schema-row"><span class="col-n">createdAt</span><span class="col-t">timestamp</span><span></span></div>
+            <div class="schema-row"><span class="col-n">createdBy</span><span class="col-t">text</span><span style="font-size:0.58rem;color:#64748b">"system"/email</span></div>
+          </div>
+          <div style="padding:6px 14px;border-top:1px solid rgba(255,255,255,0.08);font-size:0.6rem;color:#94a3b8">
+            noteType: status_update · hearing_notice · result · user_note
+          </div>
+        </div>
+
+        <div class="schema-card b-amber">
+          <div class="schema-header">users <span style="font-size:0.65rem;font-weight:400;opacity:0.85">demo auth</span></div>
+          <div class="schema-rows">
+            <div class="schema-row"><span class="col-n">id</span><span class="col-t">serial</span><span class="col-pk">PK</span></div>
+            <div class="schema-row"><span class="col-n">email</span><span class="col-t">text UNIQUE NOT NULL</span><span></span></div>
+            <div class="schema-row"><span class="col-n">passwordHash</span><span class="col-t">text NOT NULL</span><span></span></div>
+            <div class="schema-row"><span class="col-n">fullName</span><span class="col-t">text NOT NULL</span><span></span></div>
+            <div class="schema-row"><span class="col-n">createdAt</span><span class="col-t">timestamp</span><span></span></div>
+            <div class="schema-row"><span class="col-n">updatedAt</span><span class="col-t">timestamp</span><span></span></div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Known gotchas -->
+  <div class="section">
+    <div class="section-title">Known DB Gotchas</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px">
+      <div style="background:#2a1a1a;border:1px solid #f97316;border-radius:8px;padding:14px 18px;min-width:220px;flex:1;font-size:0.72rem;color:#fbd38d">
+        <div style="font-weight:700;margin-bottom:5px;color:#fb923c">⚠ drizzle-kit push broken</div>
+        Driver conflict — use Neon SQL Editor for all schema changes. Do NOT attempt to fix.
+      </div>
+      <div style="background:#1a1a2a;border:1px solid #60a5fa;border-radius:8px;padding:14px 18px;min-width:220px;flex:1;font-size:0.72rem;color:#93c5fd">
+        <div style="font-weight:700;margin-bottom:5px;color:#60a5fa">ℹ HTTP driver</div>
+        Uses @neondatabase/serverless + drizzle-orm/neon-http (not WebSocket). Serverless-safe on Vercel.
+      </div>
+      <div style="background:#1a2a1a;border:1px solid #4ade80;border-radius:8px;padding:14px 18px;min-width:220px;flex:1;font-size:0.72rem;color:#86efac">
+        <div style="font-weight:700;margin-bottom:5px;color:#4ade80">✓ FBCAD data gaps</div>
+        Fort Bend: prior_appr_val=NULL, protested='N', neighborhood_code=''. Comp fallback uses zip code.
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /database -->
+
+
+<!-- ══════════════════════════════════════════════════
+     TAB 5 — TECH STACK
+══════════════════════════════════════════════════ -->
+<div id="tab-stack" class="tab-pane">
+<div style="max-width:1100px;margin:0 auto">
+
+  <div class="section">
+    <div class="section-title">Core Framework</div>
+    <div class="brick-grid">
+      <div class="brick b-blue" style="min-width:190px;max-width:230px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Next.js 16.2.7</div>
+          <div class="brick-desc">App Router · SSR server components · API route handlers · file-based routing</div>
+          <div class="brick-tags"><span class="tag">npm: next</span></div>
+        </div>
+      </div>
+      <div class="brick b-blue" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">React 19.2.4</div>
+          <div class="brick-desc">useState · useEffect · useRef · useCallback · useRouter</div>
+          <div class="brick-tags"><span class="tag">npm: react</span></div>
+        </div>
+      </div>
+      <div class="brick b-cyan" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">TypeScript 5</div>
+          <div class="brick-desc">Strict typing throughout · interface definitions · path alias @/*</div>
+          <div class="brick-tags"><span class="tag">devDep</span></div>
+        </div>
+      </div>
+      <div class="brick b-cyan" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Tailwind CSS v4</div>
+          <div class="brick-desc">Utility-first CSS · PostCSS plugin · devDep only</div>
+          <div class="brick-tags"><span class="tag">devDep</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Database Layer</div>
+    <div class="brick-grid">
+      <div class="brick b-orange" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">@neondatabase/serverless ^1.1.0</div>
+          <div class="brick-desc">HTTP-based Postgres driver · serverless-safe · no WebSocket dependency</div>
+          <div class="brick-tags"><span class="tag">neon-http</span></div>
+        </div>
+      </div>
+      <div class="brick b-orange" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">drizzle-orm ^0.45.2</div>
+          <div class="brick-desc">Type-safe ORM · pgTable schema defs · select/insert/update/eq helpers</div>
+          <div class="brick-tags"><span class="tag">drizzle-orm/neon-http</span></div>
+        </div>
+      </div>
+      <div class="brick b-amber" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">pg ^8.21.0</div>
+          <div class="brick-desc">Node-postgres client (used in import scripts)</div>
+          <div class="brick-tags"><span class="tag">scripts only</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">PDF & E-Signature</div>
+    <div class="brick-grid">
+      <div class="brick b-rose" style="min-width:210px;max-width:260px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">pdf-lib ^1.17.1</div>
+          <div class="brick-desc">Creates Forms 50-132 + 50-162 from scratch · fills text fields · embeds PNG signature image · returns bytes for download</div>
+          <div class="brick-tags"><span class="tag">POST /api/generate-pdf</span></div>
+        </div>
+      </div>
+      <div class="brick b-pink" style="min-width:200px;max-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">react-signature-canvas ^1.1.0-alpha</div>
+          <div class="brick-desc">Touch/mouse canvas drawing · toDataURL('image/png') → base64 blob · ref.clear() support</div>
+          <div class="brick-tags"><span class="tag">/sign/[id] client</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Maps & Geocoding</div>
+    <div class="brick-grid">
+      <div class="brick b-green" style="min-width:180px;max-width:220px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">react-leaflet ^5.0.0</div>
+          <div class="brick-desc">React wrapper for Leaflet · dynamic import for SSR · PropertyMap.tsx component</div>
+          <div class="brick-tags"><span class="tag">⚠ pin bug open</span></div>
+        </div>
+      </div>
+      <div class="brick b-teal" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">leaflet ^1.9.4</div>
+          <div class="brick-desc">Map tiles from OpenStreetMap · no API key needed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Forms & Validation</div>
+    <div class="brick-grid">
+      <div class="brick b-indigo" style="min-width:180px;max-width:220px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">react-hook-form ^7.77.0</div>
+          <div class="brick-desc">Form state management · controlled inputs · submit handling</div>
+        </div>
+      </div>
+      <div class="brick b-violet" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">zod ^4.4.3</div>
+          <div class="brick-desc">Schema validation · type inference · @hookform/resolvers bridge</div>
+        </div>
+      </div>
+      <div class="brick b-slate" style="min-width:140px;max-width:180px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">@hookform/resolvers ^5.4.0</div>
+          <div class="brick-desc">Zod ↔ RHF bridge</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Infrastructure & Tooling</div>
+    <div class="brick-grid">
+      <div class="brick b-purple" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">Vercel (free tier)</div>
+          <div class="brick-desc">Target: trimtax.vercel.app · Serverless Functions · auto-deploy from git</div>
+        </div>
+      </div>
+      <div class="brick b-purple" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">NeonDB (free tier)</div>
+          <div class="brick-desc">Serverless Postgres · 0.5 GB cap · currently at 308 MB · console.neon.tech</div>
+        </div>
+      </div>
+      <div class="brick b-slate" style="min-width:160px;max-width:200px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">eslint ^9</div>
+          <div class="brick-desc">eslint-config-next 16.2.7 · linting rules</div>
+          <div class="brick-tags"><span class="tag">devDep</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /stack -->
+
+
+<!-- ══════════════════════════════════════════════════
+     TAB 6 — DATA PIPELINE
+══════════════════════════════════════════════════ -->
+<div id="tab-pipeline" class="tab-pane">
+<div style="max-width:1100px;margin:0 auto">
+
+  <div class="section">
+    <div class="section-title">Harris County (HCAD) — 1,111,467 properties</div>
+    <div class="pipeline-flow">
+      <div class="pipe-file">
+        <strong>real_acct.txt</strong>
+        <span>867 MB · tab-delimited · HAS header</span>
+        <div style="margin-top:4px;font-size:0.6rem;color:#64748b">Downloaded from HCAD bulk files<br>C:\Users\adver\Downloads\Real_acct_owner\</div>
+      </div>
+      <div class="pipe-arrow">
+        <svg width="32" height="16"><path d="M2 8 L26 8 M20 3 L28 8 L20 13" stroke="#db2777" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>streams line-by-line<br>never loads to RAM</span>
+      </div>
+      <div class="brick b-pink" style="min-width:210px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">filter-hcad.js</div>
+          <div class="brick-desc">Keep: state_class starts with "A" (residential) AND tot_appr_val &lt; $1M<br>Extract: acct, site_addr_1, city, zip, mailto, Neighborhood_Code, bld_ar, tot_appr_val, prior_tot_appr_val, protested</div>
+          <div class="brick-tags"><span class="tag">Node.js streams</span></div>
+        </div>
+      </div>
+      <div class="pipe-arrow">
+        <svg width="32" height="16"><path d="M2 8 L26 8 M20 3 L28 8 L20 13" stroke="#db2777" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>106 MB CSV<br>hcad_filtered.csv</span>
+      </div>
+      <div class="brick b-rose" style="min-width:220px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">import-to-neon.js</div>
+          <div class="brick-desc">Stream CSV · batch INSERT 500 rows at a time via @neondatabase/serverless<br>ON CONFLICT (acct) DO NOTHING<br>Env: line-by-line .env.local parser (avoids placeholder bug)</div>
+          <div class="brick-tags"><span class="tag">1,111,467 rows</span><span class="tag">227 MB in Neon</span></div>
+        </div>
+      </div>
+      <div class="pipe-arrow">
+        <svg width="32" height="16"><path d="M2 8 L26 8 M20 3 L28 8 L20 13" stroke="#db2777" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>live in Neon</span>
+      </div>
+      <div class="pipe-file">
+        <strong>properties table</strong>
+        <span>Harris rows: 1,111,467</span>
+        <div style="margin-top:4px;font-size:0.6rem;color:#4ade80">✓ complete · neighbor+hood_code populated</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Fort Bend County (FBCAD) — 404,857 properties</div>
+    <div class="pipeline-flow">
+      <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+        <div class="pipe-file">
+          <strong>PropertyDataExport*.txt</strong>
+          <span>210 MB · comma-delimited · quoted fields</span>
+        </div>
+        <div class="pipe-file">
+          <strong>Owner file</strong>
+          <span>72 MB · PropertyID → OwnerName</span>
+        </div>
+      </div>
+      <div class="pipe-arrow">
+        <svg width="32" height="16"><path d="M2 8 L26 8 M20 3 L28 8 L20 13" stroke="#db2777" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>join on PropertyID</span>
+      </div>
+      <div class="brick b-pink" style="min-width:240px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">filter-fbcad.js</div>
+          <div class="brick-desc">Load Owner file → Map&lt;PropertyID, OwnerName&gt; in memory<br>Stream Property file · filter: value &gt; 0 AND &lt; $1M AND street addr length ≥ 3 (drops utilities/pipelines)<br>Join owner name · map to common schema</div>
+          <div class="brick-tags"><span class="tag">in-memory Map join</span><span class="tag">412k→404k after filter</span></div>
+        </div>
+      </div>
+      <div class="pipe-arrow">
+        <svg width="32" height="16"><path d="M2 8 L26 8 M20 3 L28 8 L20 13" stroke="#db2777" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>36 MB CSV<br>fbcad_filtered.csv</span>
+      </div>
+      <div class="brick b-rose" style="min-width:220px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">import-fbcad-to-neon.js</div>
+          <div class="brick-desc">Same batch import pattern<br>FBCAD-specific: prior_appr_val=null · protested='N' · neighborhood_code='' · county='Fort Bend'<br>ON CONFLICT (acct) DO NOTHING</div>
+          <div class="brick-tags"><span class="tag">404,857 rows</span><span class="tag">~81 MB in Neon</span></div>
+        </div>
+      </div>
+      <div class="pipe-arrow">
+        <svg width="32" height="16"><path d="M2 8 L26 8 M20 3 L28 8 L20 13" stroke="#db2777" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>live in Neon</span>
+      </div>
+      <div class="pipe-file">
+        <strong>properties table</strong>
+        <span>Fort Bend rows: 404,857</span>
+        <div style="margin-top:4px;font-size:0.6rem;color:#fbbf24">⚠ no neighborhood_code<br>comp fallback uses zip</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Performance Indexes</div>
+    <div class="brick-grid">
+      <div class="brick b-slate" style="min-width:240px;max-width:300px">
+        <div class="brick-studs"><div class="stud"></div><div class="stud"></div><div class="stud"></div></div>
+        <div class="brick-face">
+          <div class="brick-name">add-indexes.js</div>
+          <div class="brick-desc">Adds composite indexes post-import for comp query performance:<br>· (neighborhood_code, bld_ar, cur_appr_val)<br>· (zip, bld_ar, cur_appr_val)<br>· (county) for filtering</div>
+          <div class="brick-tags"><span class="tag">one-time DBA util</span><span class="tag">run after import</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Data Refresh Runbook</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px">
+      <div style="background:#1e2535;border:1px solid #2a3448;border-radius:8px;padding:14px 18px;flex:1;min-width:260px">
+        <div style="font-weight:700;font-size:0.75rem;color:#f472b6;margin-bottom:8px">Harris County (Jan each year)</div>
+        <ol style="padding-left:16px;font-size:0.68rem;color:#94a3b8;line-height:1.8">
+          <li>Re-download <code style="color:#e2e8f0">real_acct.txt</code> from HCAD bulk files</li>
+          <li>Optional: <code style="color:#e2e8f0">DELETE FROM properties WHERE county='Harris'</code></li>
+          <li>Run <code style="color:#e2e8f0">node scripts/filter-hcad.js</code></li>
+          <li>Run <code style="color:#e2e8f0">node scripts/import-to-neon.js</code></li>
+        </ol>
+      </div>
+      <div style="background:#1e2535;border:1px solid #2a3448;border-radius:8px;padding:14px 18px;flex:1;min-width:260px">
+        <div style="font-weight:700;font-size:0.75rem;color:#f472b6;margin-bottom:8px">Fort Bend County (Jan each year)</div>
+        <ol style="padding-left:16px;font-size:0.68rem;color:#94a3b8;line-height:1.8">
+          <li>Download latest Property Data Export from fbcad.org/data-files/</li>
+          <li>Extract Property.zip + Owner.zip</li>
+          <li>Update file paths in <code style="color:#e2e8f0">filter-fbcad.js</code></li>
+          <li>Run <code style="color:#e2e8f0">node scripts/filter-fbcad.js</code></li>
+          <li>Run <code style="color:#e2e8f0">node scripts/import-fbcad-to-neon.js</code></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /pipeline -->
+
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+const tabs = document.querySelectorAll('.tab-btn');
+const panes = document.querySelectorAll('.tab-pane');
+
+tabs.forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+
+    tabs.forEach(t => t.classList.remove('active'));
+    panes.forEach(p => p.classList.remove('active'));
+
+    btn.classList.add('active');
+    document.getElementById('tab-' + target).classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
