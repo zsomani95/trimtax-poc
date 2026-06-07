@@ -34,6 +34,20 @@ function stdDev(arr: number[]): number {
   return Math.sqrt(arr.reduce((a, b) => a + (b - avg) ** 2, 0) / arr.length)
 }
 
+// Texas county tax rates (effective rate including school district, city, county)
+function getTaxRate(county: string): number {
+  const rates: Record<string, number> = {
+    'Harris': 0.0175,      // ~1.75% effective rate
+    'Fort Bend': 0.0170,   // ~1.70% effective rate
+  }
+  return rates[county] || 0.0172  // Default to 1.72% if county not found
+}
+
+function calculateTaxSavings(appraisalReduction: number, taxRate: number): number {
+  // Annual tax savings = appraisal reduction × tax rate
+  return Math.round(appraisalReduction * taxRate)
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ acct: string }> }
@@ -56,14 +70,16 @@ export async function GET(
       return NextResponse.json({ error: 'Property not found' }, { status: 404 })
     }
 
-    // 2. Get comps
+    // 2. Get comps (ordered for deterministic results)
     const hasNbhd = (subject.neighborhood_code ?? '').trim().length > 0
     const compsQuery = hasNbhd
       ? `SELECT cur_appr_val, bld_ar FROM properties
          WHERE neighborhood_code = $1 AND county = $2 AND acct != $3 AND bld_ar > 200 AND cur_appr_val > 10000
+         ORDER BY acct ASC
          LIMIT 500`
       : `SELECT cur_appr_val, bld_ar FROM properties
          WHERE zip = $1 AND county = $2 AND acct != $3 AND bld_ar > 200 AND cur_appr_val > 10000
+         ORDER BY acct ASC
          LIMIT 500`
 
     const compsResult = await db.query(
@@ -96,15 +112,20 @@ export async function GET(
         : ppsfs.length >= 10 ? 'medium'
           : 'low'
 
-    const savingsMin = savings > 0 ? Math.round(savings * 0.7) : 0
-    const savingsMax = savings
+    const appraisalReduction = Math.max(savings, 0)
+    const taxRate = getTaxRate(subject.county)
+    const annualTaxSavings = calculateTaxSavings(appraisalReduction, taxRate)
+    const savingsMin = annualTaxSavings > 0 ? Math.round(annualTaxSavings * 0.7) : 0
+    const savingsMax = annualTaxSavings
 
     return NextResponse.json({
       subject,
       comps_count: ppsfs.length,
       median_ppsf: Math.round(medPpsf * 100) / 100,
       argued_value: argued,
-      savings,
+      appraisal_reduction: savings,
+      annual_tax_savings: annualTaxSavings,
+      tax_rate: (taxRate * 100).toFixed(2) + '%',
       savings_min: savingsMin,
       savings_max: savingsMax,
       confidence,

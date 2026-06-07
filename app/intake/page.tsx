@@ -162,7 +162,7 @@ export default function IntakePage() {
           cad_account_number: estimate.subject.acct,
           cad_value: estimate.subject.cur_appr_val,
           argued_value: estimate.argued_value ?? 0,
-          projected_savings: estimate.savings ?? 0,
+          projected_savings: estimate.annual_tax_savings ?? 0,
           status: 'pending',
         }),
       })
@@ -338,10 +338,11 @@ export default function IntakePage() {
                   <p style={{ margin: '0', fontWeight: 'bold' }}>{Number(estimate.subject.bld_ar).toLocaleString()} sqft</p>
                 </div>
                 <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '4px', fontSize: '13px' }}>
-                  <p style={{ margin: '0 0 5px 0', color: '#666', fontSize: '12px' }}>Potential Reduction</p>
-                  <p style={{ margin: '0', fontWeight: 'bold', color: estimate.savings && estimate.savings > 0 ? '#047857' : '#999' }}>
-                    {estimate.savings !== undefined ? (estimate.savings > 0 ? fmt(estimate.savings) : '$0') : '—'}
+                  <p style={{ margin: '0 0 5px 0', color: '#666', fontSize: '12px' }}>Annual Tax Savings</p>
+                  <p style={{ margin: '0', fontWeight: 'bold', color: estimate.annual_tax_savings && estimate.annual_tax_savings > 0 ? '#047857' : '#999' }}>
+                    {estimate.annual_tax_savings !== undefined ? (estimate.annual_tax_savings > 0 ? fmt(estimate.annual_tax_savings) : '$0') : '—'}
                   </p>
+                  {estimate.tax_rate && <p style={{ margin: '4px 0 0 0', color: '#999', fontSize: '11px' }}>@ {estimate.tax_rate}</p>}
                 </div>
               </div>
 
