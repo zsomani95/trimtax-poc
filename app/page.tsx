@@ -11,6 +11,17 @@ interface Property {
   zip: string
 }
 
+const colors = {
+  primary: '#059669',
+  primaryDark: '#047857',
+  dark: '#0f172a',
+  darkAlt: '#1e293b',
+  darkText: '#111827',
+  white: '#ffffff',
+  gray: '#6b7280',
+  grayLight: '#f3f4f6',
+}
+
 export default function HomePage() {
   const router = useRouter()
   const [address, setAddress] = useState('')
@@ -57,34 +68,54 @@ export default function HomePage() {
   }, [])
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%)', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ minHeight: '100vh', background: colors.white, display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=IBM+Plex+Sans:wght@400;600&display=swap');
+
+        * { font-family: 'IBM Plex Sans', sans-serif; }
+        h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hero-section { animation: fadeIn 0.6s ease-out; }
+        .search-box { animation: slideUp 0.6s ease-out 0.2s both; }
+        .feature { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .feature:hover { transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+        input::placeholder { color: '#9ca3af'; }
+        input:focus { outline: none; border-color: ${colors.primary} !important; box-shadow: 0 0 0 3px ${colors.primary}20; }
+      `}
+      </style>
+
       {/* Header */}
-      <header style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+      <header style={{ padding: '24px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${colors.grayLight}`, background: colors.white }}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 'bold', color: '#fff', margin: 0 }}>TrimTax</h1>
-          <p style={{ color: '#aaa', fontSize: '12px', margin: '4px 0 0 0' }}>Automated Property Tax Protests</p>
+          <h1 style={{ fontSize: '28px', fontWeight: 700, color: colors.darkText, margin: 0, letterSpacing: '-0.5px' }}>TrimTax</h1>
+          <p style={{ color: colors.gray, fontSize: '13px', margin: '4px 0 0 0', fontWeight: 500 }}>Automated Property Tax Protests</p>
         </div>
         <div style={{ display: 'flex', gap: '12px' }}>
           <Link
             href="/login"
             style={{
-              color: '#0066cc',
+              color: colors.primary,
               textDecoration: 'none',
-              fontWeight: 'bold',
+              fontWeight: 600,
               fontSize: '14px',
-              padding: '10px 20px',
-              border: '1px solid #0066cc',
-              borderRadius: '6px',
+              padding: '11px 24px',
+              border: `2px solid ${colors.primary}`,
+              borderRadius: '8px',
               cursor: 'pointer',
-              transition: 'all 0.2s',
+              transition: 'all 0.3s ease',
+              backgroundColor: 'transparent',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#0066cc'
-              e.currentTarget.style.color = '#fff'
+              e.currentTarget.style.backgroundColor = colors.primary
+              e.currentTarget.style.color = colors.white
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.color = '#0066cc'
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = colors.primary
             }}
           >
             Sign In
@@ -92,43 +123,50 @@ export default function HomePage() {
           <Link
             href="/register"
             style={{
-              background: '#047857',
-              color: '#fff',
+              background: colors.primary,
+              color: colors.white,
               textDecoration: 'none',
-              fontWeight: 'bold',
+              fontWeight: 600,
               fontSize: '14px',
-              padding: '10px 20px',
-              borderRadius: '6px',
+              padding: '11px 24px',
+              borderRadius: '8px',
               cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              border: 'none',
             }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = colors.primaryDark)}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = colors.primary)}
           >
-            Create Account
+            Get Started
           </Link>
         </div>
       </header>
 
-      {/* Hero */}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
-        <div style={{ maxWidth: '700px', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '48px', fontWeight: 'bold', color: '#fff', margin: '0 0 16px 0', lineHeight: '1.2' }}>
+      {/* Hero Section */}
+      <div className="hero-section" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '60px 40px', background: `linear-gradient(135deg, ${colors.grayLight} 0%, ${colors.white} 100%)`, position: 'relative', overflow: 'hidden' }}>
+        {/* Decorative background element */}
+        <div style={{ position: 'absolute', width: '600px', height: '600px', background: `radial-gradient(circle, ${colors.primary}08 0%, transparent 70%)`, borderRadius: '50%', top: '-200px', right: '-200px', zIndex: 0 }} />
+
+        <div style={{ maxWidth: '680px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+          <h2 style={{ fontSize: '56px', fontWeight: 700, color: colors.darkText, margin: '0 0 20px 0', lineHeight: 1.2, letterSpacing: '-1px' }}>
             Lower Your Property Tax
           </h2>
-          <p style={{ fontSize: '20px', color: '#aaa', margin: '0 0 40px 0', lineHeight: '1.6' }}>
-            TrimTax automates your property tax protest. We handle everything from valuation analysis to filing. Pay nothing unless we win.
+          <p style={{ fontSize: '18px', color: colors.gray, margin: '0 0 48px 0', lineHeight: 1.7, fontWeight: 500 }}>
+            TrimTax automates your property tax protest. We analyze your property, find comparable sales, and handle everything from filing to resolution. Pay nothing unless we win.
           </p>
 
           {/* Search Box */}
-          <div style={{ display: 'grid', gap: '16px', marginBottom: '40px', position: 'relative' }} ref={dropdownRef}>
+          <div className="search-box" style={{ position: 'relative', marginBottom: '60px' }} ref={dropdownRef}>
             <div style={{
-              background: '#fff',
+              background: colors.white,
               borderRadius: '12px',
-              padding: '20px',
-              boxShadow: '0 20px 50px rgba(0,0,0,0.3)',
+              padding: '28px',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.08)',
               display: 'grid',
-              gap: '12px',
+              gap: '14px',
               position: 'relative',
             }}>
-              <label style={{ textAlign: 'left', fontWeight: 'bold', color: '#111827', fontSize: '14px' }}>
+              <label style={{ textAlign: 'left', fontWeight: 600, color: colors.darkText, fontSize: '15px', letterSpacing: '0.3px' }}>
                 Enter your property address
               </label>
               <input
@@ -139,14 +177,15 @@ export default function HomePage() {
                 placeholder="e.g., 123 Westheimer Rd, Houston, TX"
                 autoFocus
                 style={{
-                  padding: '14px',
-                  border: '1px solid #999',
+                  padding: '16px',
+                  border: `2px solid ${colors.grayLight}`,
                   borderRadius: '8px',
                   fontSize: '16px',
                   boxSizing: 'border-box',
-                  fontFamily: 'inherit',
-                  color: '#1f2937',
-                  backgroundColor: '#fff',
+                  color: colors.darkText,
+                  backgroundColor: colors.white,
+                  fontWeight: 500,
+                  transition: 'all 0.3s ease',
                 }}
               />
 
@@ -154,16 +193,16 @@ export default function HomePage() {
               {showDropdown && results.length > 0 && (
                 <div style={{
                   position: 'absolute',
-                  top: 'calc(100% + 4px)',
+                  top: 'calc(100% + 8px)',
                   left: 0,
                   right: 0,
-                  background: '#fff',
-                  border: '1px solid #ddd',
+                  background: colors.white,
+                  border: `1px solid ${colors.grayLight}`,
                   borderRadius: '8px',
-                  maxHeight: '300px',
+                  maxHeight: '320px',
                   overflowY: 'auto',
                   zIndex: 100,
-                  boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
                 }}>
                   {results.map((property, idx) => (
                     <div
@@ -173,17 +212,18 @@ export default function HomePage() {
                         setShowDropdown(false)
                       }}
                       style={{
-                        padding: '12px 14px',
-                        borderBottom: idx < results.length - 1 ? '1px solid #f3f4f6' : 'none',
+                        padding: '14px 16px',
+                        borderBottom: idx < results.length - 1 ? `1px solid ${colors.grayLight}` : 'none',
                         cursor: 'pointer',
                         fontSize: '14px',
-                        color: '#1f2937',
+                        color: colors.darkText,
+                        transition: 'all 0.2s ease',
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.background = '#f9fafb')}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = colors.grayLight)}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                     >
-                      <div style={{ fontWeight: 'bold', marginBottom: '2px' }}>{property.site_addr_1}</div>
-                      <div style={{ fontSize: '12px', color: '#666' }}>
+                      <div style={{ fontWeight: 600, marginBottom: '3px' }}>{property.site_addr_1}</div>
+                      <div style={{ fontSize: '13px', color: colors.gray }}>
                         {property.city}, {property.zip}
                       </div>
                     </div>
@@ -194,36 +234,36 @@ export default function HomePage() {
               {showDropdown && searching && (
                 <div style={{
                   position: 'absolute',
-                  top: '100%',
+                  top: 'calc(100% + 8px)',
                   left: 0,
                   right: 0,
-                  background: '#fff',
-                  border: '1px solid #ddd',
-                  borderTop: 'none',
-                  borderRadius: '0 0 8px 8px',
-                  padding: '12px 14px',
+                  background: colors.white,
+                  border: `1px solid ${colors.grayLight}`,
+                  borderRadius: '8px',
+                  padding: '16px',
                   textAlign: 'center',
-                  color: '#666',
+                  color: colors.gray,
                   fontSize: '14px',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
                 }}>
-                  ⏳ Searching...
+                  ⏳ Searching properties...
                 </div>
               )}
 
               {showDropdown && !searching && results.length === 0 && address.trim() && (
                 <div style={{
                   position: 'absolute',
-                  top: '100%',
+                  top: 'calc(100% + 8px)',
                   left: 0,
                   right: 0,
-                  background: '#fff',
-                  border: '1px solid #ddd',
-                  borderTop: 'none',
-                  borderRadius: '0 0 8px 8px',
-                  padding: '12px 14px',
+                  background: colors.white,
+                  border: `1px solid ${colors.grayLight}`,
+                  borderRadius: '8px',
+                  padding: '16px',
                   textAlign: 'center',
-                  color: '#999',
+                  color: '#9ca3af',
                   fontSize: '14px',
+                  boxShadow: '0 20px 50px rgba(0,0,0,0.12)',
                 }}>
                   No properties found
                 </div>
@@ -231,36 +271,36 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Features */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
-            <div style={{ color: '#fff' }}>
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>🏠</div>
-              <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>Real Data</p>
-              <p style={{ color: '#aaa', fontSize: '13px', margin: 0 }}>1.5M Harris & Fort Bend properties</p>
+          {/* Features Grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '24px' }}>
+            <div className="feature" style={{ padding: '24px', background: colors.white, borderRadius: '10px', border: `1px solid ${colors.grayLight}`, transition: 'all 0.3s ease', cursor: 'default' }}>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>📊</div>
+              <p style={{ fontWeight: 600, margin: '0 0 6px 0', color: colors.darkText, fontSize: '15px' }}>Real Data</p>
+              <p style={{ color: colors.gray, fontSize: '13px', margin: 0 }}>1.5M properties from Harris & Fort Bend</p>
             </div>
-            <div style={{ color: '#fff' }}>
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>📊</div>
-              <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>Instant Estimate</p>
-              <p style={{ color: '#aaa', fontSize: '13px', margin: 0 }}>Comp algorithm with confidence score</p>
+            <div className="feature" style={{ padding: '24px', background: colors.white, borderRadius: '10px', border: `1px solid ${colors.grayLight}`, transition: 'all 0.3s ease', cursor: 'default' }}>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎯</div>
+              <p style={{ fontWeight: 600, margin: '0 0 6px 0', color: colors.darkText, fontSize: '15px' }}>Smart Analysis</p>
+              <p style={{ color: colors.gray, fontSize: '13px', margin: 0 }}>Instant estimates with confidence scores</p>
             </div>
-            <div style={{ color: '#fff' }}>
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>✍️</div>
-              <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>E-Signature</p>
-              <p style={{ color: '#aaa', fontSize: '13px', margin: 0 }}>Sign & file in minutes</p>
+            <div className="feature" style={{ padding: '24px', background: colors.white, borderRadius: '10px', border: `1px solid ${colors.grayLight}`, transition: 'all 0.3s ease', cursor: 'default' }}>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>✍️</div>
+              <p style={{ fontWeight: 600, margin: '0 0 6px 0', color: colors.darkText, fontSize: '15px' }}>E-Signature</p>
+              <p style={{ color: colors.gray, fontSize: '13px', margin: 0 }}>Sign & file your protest in minutes</p>
             </div>
-            <div style={{ color: '#fff' }}>
-              <div style={{ fontSize: '32px', marginBottom: '8px' }}>💰</div>
-              <p style={{ fontWeight: 'bold', margin: '0 0 4px 0' }}>25% Contingency</p>
-              <p style={{ color: '#aaa', fontSize: '13px', margin: 0 }}>Pay nothing unless we win</p>
+            <div className="feature" style={{ padding: '24px', background: colors.white, borderRadius: '10px', border: `1px solid ${colors.grayLight}`, transition: 'all 0.3s ease', cursor: 'default' }}>
+              <div style={{ fontSize: '40px', marginBottom: '12px' }}>💰</div>
+              <p style={{ fontWeight: 600, margin: '0 0 6px 0', color: colors.darkText, fontSize: '15px' }}>25% Contingency</p>
+              <p style={{ color: colors.gray, fontSize: '13px', margin: 0 }}>Pay only if we win</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <footer style={{ padding: '20px 40px', borderTop: '1px solid rgba(255,255,255,0.1)', color: '#aaa', fontSize: '12px', textAlign: 'center' }}>
-        <p style={{ margin: 0 }}>TrimTax is a document preparation service, not a licensed appraisal or legal service.</p>
-        <p style={{ margin: '8px 0 0 0' }}>© 2026 TrimTax. All rights reserved.</p>
+      <footer style={{ padding: '32px 40px', background: colors.darkAlt, color: '#a0aec0', fontSize: '13px', textAlign: 'center', borderTop: `1px solid ${colors.dark}20` }}>
+        <p style={{ margin: 0, fontWeight: 500 }}>TrimTax is a document preparation service, not a licensed appraisal or legal service.</p>
+        <p style={{ margin: '8px 0 0 0', color: '#64748b' }}>© 2026 TrimTax. All rights reserved.</p>
       </footer>
     </div>
   )
