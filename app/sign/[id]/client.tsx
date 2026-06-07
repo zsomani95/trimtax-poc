@@ -131,7 +131,7 @@ export default function SignPageClient({
 
       <div style={{ maxWidth: '700px', margin: '0 auto', fontFamily: 'system-ui', padding: '0 20px 20px 20px' }}>
         <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '28px' }}>File Your Protest</h2>
-        <p style={{ color: '#666', marginTop: 0, marginBottom: '30px' }}>Complete e-signature and we'll handle the rest</p>
+        <p style={{ color: colors.gray, marginTop: 0, marginBottom: '30px', fontSize: '16px', fontWeight: 500 }}>Complete e-signature and we'll handle the rest</p>
 
       {/* STEP 1: REVIEW */}
       {step === 1 && (
@@ -219,7 +219,7 @@ export default function SignPageClient({
       {step === 2 && (
         <div style={{ border: '1px solid #ddd', padding: '24px', borderRadius: '8px', backgroundColor: '#fff' }}>
           <h2 style={{ marginTop: 0 }}>E-Signature</h2>
-          <p style={{ color: '#666' }}>Sign above. Your signature authorizes TrimTax to file your protest.</p>
+          <p style={{ color: colors.gray, fontSize: '16px', fontWeight: 500 }}>Sign above. Your signature authorizes TrimTax to file your protest.</p>
 
           <div style={{
             border: '2px dashed #ccc',

@@ -134,7 +134,7 @@ export default function DashboardPage() {
         {/* Summary Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '30px' }}>
           <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
-            <p style={{ color: '#666', fontSize: '13px', margin: '0 0 8px 0' }}>Total Properties</p>
+            <p style={{ color: colors.gray, fontSize: '13px', margin: '0 0 8px 0', fontWeight: 500 }}>Total Properties</p>
             <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827', margin: 0 }}>{submissions.length}</p>
           </div>
           <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
           </div>
         ) : submissions.length === 0 ? (
           <div style={{ background: '#fff', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
-            <p style={{ color: '#666', marginBottom: '20px' }}>No properties yet. Start a new submission to see it here.</p>
+            <p style={{ color: colors.gray, marginBottom: '20px', fontSize: '16px', fontWeight: 500 }}>No properties yet. Start a new submission to see it here.</p>
             <Link
               href="/intake"
               style={{
