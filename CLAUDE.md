@@ -56,9 +56,9 @@ A fully automated Texas property tax protest platform targeting homeowners. A ho
 
 ### NeonDB connection string
 ```
-DATABASE_URL=postgresql://neondb_owner:npg_3rF2zojLEumM@ep-green-shape-ajhuhvsm.c-3.us-east-2.aws.neon.tech/neondb?sslmode=require
+DATABASE_URL=postgresql://user:password@host/database?sslmode=require
 ```
-Stored in `.env.local` at project root (single line, no quotes).
+**SENSITIVE:** Never commit actual credentials to git. Use `.env.local` for real connection string (not tracked by git).
 
 ---
 
