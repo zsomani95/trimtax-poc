@@ -170,7 +170,7 @@ export default function IntakePage() {
       if (result.error) {
         setSubmitError(result.error)
       } else {
-        router.push(`/analysis/${result.id}`)
+        router.push(`/sign/${result.id}`)
       }
     } catch (err) {
       setSubmitError(String(err))
