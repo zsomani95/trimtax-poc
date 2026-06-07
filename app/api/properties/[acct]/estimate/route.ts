@@ -106,19 +106,6 @@ export async function GET(
     const argued = Math.round(medPpsf * Number(subject.bld_ar))
     const savings = Number(subject.cur_appr_val) - argued
 
-    // Only return estimate if property is OVERVALUED (CAD > argued)
-    if (savings <= 0) {
-      return NextResponse.json({
-        subject,
-        comps_count: ppsfs.length,
-        median_ppsf: Math.round(medPpsf * 100) / 100,
-        argued_value: argued,
-        appraisal_reduction: savings,
-        no_opportunity: true,
-        message: `Property appears fairly valued. Market rate: $${argued.toLocaleString()}, CAD value: $${Number(subject.cur_appr_val).toLocaleString()}`
-      })
-    }
-
     const cv = stdDev(w) / medPpsf
     const overage = (Number(subject.cur_appr_val) / Number(subject.bld_ar)) / medPpsf - 1
     const confidence =
@@ -129,7 +116,7 @@ export async function GET(
     const appraisalReduction = savings
     const taxRate = getTaxRate(subject.county)
     const annualTaxSavings = calculateTaxSavings(appraisalReduction, taxRate)
-    const savingsMin = Math.round(annualTaxSavings * 0.7)
+    const savingsMin = annualTaxSavings > 0 ? Math.round(annualTaxSavings * 0.7) : 0
     const savingsMax = annualTaxSavings
 
     return NextResponse.json({
