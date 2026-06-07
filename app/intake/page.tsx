@@ -256,6 +256,12 @@ export default function IntakePage() {
               Analyzing property and finding comparables...
             </div>
           )}
+          {estimate?.no_opportunity && (
+            <div style={{ background: '#fef3c7', border: '1px solid #f59e0b', borderRadius: '4px', padding: '12px', margin: '10px 0', color: '#92400e' }}>
+              <strong>No Protest Opportunity</strong><br/>
+              {estimate.message}
+            </div>
+          )}
           {estimateError && <div style={{ background: '#fee2e2', border: '1px solid #dc2626', borderRadius: '4px', padding: '12px', margin: '10px 0', color: '#991b1b' }}>Error: {estimateError}</div>}
         </div>
       )}
