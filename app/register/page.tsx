@@ -72,11 +72,13 @@ export default function RegisterPage() {
               placeholder="John Doe"
               style={{
                 width: '100%',
-                padding: '10px',
-                border: errors.fullName ? '2px solid #dc2626' : '1px solid #ddd',
+                padding: '12px',
+                border: errors.fullName ? '2px solid #dc2626' : '1px solid #ccc',
                 borderRadius: '6px',
-                fontSize: '14px',
+                fontSize: '16px',
                 boxSizing: 'border-box',
+                color: '#1f2937',
+                backgroundColor: '#fff',
               }}
             />
             {errors.fullName && <p style={{ color: '#dc2626', fontSize: '12px', margin: '4px 0 0 0' }}>{errors.fullName}</p>}
@@ -93,11 +95,13 @@ export default function RegisterPage() {
               placeholder="you@example.com"
               style={{
                 width: '100%',
-                padding: '10px',
-                border: errors.email ? '2px solid #dc2626' : '1px solid #ddd',
+                padding: '12px',
+                border: errors.email ? '2px solid #dc2626' : '1px solid #ccc',
                 borderRadius: '6px',
-                fontSize: '14px',
+                fontSize: '16px',
                 boxSizing: 'border-box',
+                color: '#1f2937',
+                backgroundColor: '#fff',
               }}
             />
             {errors.email && <p style={{ color: '#dc2626', fontSize: '12px', margin: '4px 0 0 0' }}>{errors.email}</p>}
@@ -114,11 +118,13 @@ export default function RegisterPage() {
               placeholder="••••••••"
               style={{
                 width: '100%',
-                padding: '10px',
-                border: errors.password ? '2px solid #dc2626' : '1px solid #ddd',
+                padding: '12px',
+                border: errors.password ? '2px solid #dc2626' : '1px solid #ccc',
                 borderRadius: '6px',
-                fontSize: '14px',
+                fontSize: '16px',
                 boxSizing: 'border-box',
+                color: '#1f2937',
+                backgroundColor: '#fff',
               }}
             />
             {errors.password && <p style={{ color: '#dc2626', fontSize: '12px', margin: '4px 0 0 0' }}>{errors.password}</p>}
@@ -135,11 +141,13 @@ export default function RegisterPage() {
               placeholder="••••••••"
               style={{
                 width: '100%',
-                padding: '10px',
-                border: errors.confirmPassword ? '2px solid #dc2626' : '1px solid #ddd',
+                padding: '12px',
+                border: errors.confirmPassword ? '2px solid #dc2626' : '1px solid #ccc',
                 borderRadius: '6px',
-                fontSize: '14px',
+                fontSize: '16px',
                 boxSizing: 'border-box',
+                color: '#1f2937',
+                backgroundColor: '#fff',
               }}
             />
             {errors.confirmPassword && <p style={{ color: '#dc2626', fontSize: '12px', margin: '4px 0 0 0' }}>{errors.confirmPassword}</p>}

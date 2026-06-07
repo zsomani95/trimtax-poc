@@ -177,9 +177,10 @@ export default function IntakePage() {
             autoFocus
             style={{
               width: '100%',
-              padding: '10px',
+              padding: '12px',
               fontSize: '16px',
-              border: '1px solid #ccc',
+              border: '1px solid #999',
+              color: '#1f2937',
               borderRadius: '4px',
               boxSizing: 'border-box',
               marginBottom: '10px',
@@ -307,9 +308,10 @@ export default function IntakePage() {
                   <p style={{ margin: '0', fontWeight: 'bold' }}>{Number(estimate.subject.bld_ar).toLocaleString()} sqft</p>
                 </div>
                 <div style={{ backgroundColor: '#f9fafb', padding: '12px', borderRadius: '4px', fontSize: '13px' }}>
-                  <p style={{ margin: '0 0 5px 0', color: '#666', fontSize: '12px' }}>TrimTax Fee (25%)</p>
-                  <p style={{ margin: '0', fontWeight: 'bold' }}>{fmt(estimate.contingency_fee ?? 0)}</p>
-                  <p style={{ margin: '3px 0 0 0', fontSize: '11px', color: '#999' }}>Only if we win</p>
+                  <p style={{ margin: '0 0 5px 0', color: '#666', fontSize: '12px' }}>Potential Reduction</p>
+                  <p style={{ margin: '0', fontWeight: 'bold', color: estimate.savings_max && estimate.savings_max > 0 ? '#047857' : '#999' }}>
+                    {estimate.savings_max && estimate.savings_max > 0 ? fmt(estimate.savings_max) : '—'}
+                  </p>
                 </div>
               </div>
 

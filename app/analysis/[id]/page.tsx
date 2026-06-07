@@ -37,7 +37,6 @@ export default async function AnalysisPage({
   }
 
   const reduction = submission.cadValue - submission.arguedValue;
-  const fee = Math.round((submission.projectedSavings ?? 0) * 0.25);
 
   return (
     <main style={{ minHeight: '100vh', padding: '20px 20px 40px 20px', background: 'linear-gradient(to bottom right, #1e293b, #0f172a)' }}>
@@ -52,9 +51,11 @@ export default async function AnalysisPage({
         </div>
 
         <div style={{ background: '#10b981', borderRadius: '12px', padding: '32px', color: '#fff', textAlign: 'center', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
-          <p style={{ margin: '0 0 10px 0', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: '#d1fae5' }}>Projected First-Year Savings</p>
-          <p style={{ margin: '0 0 10px 0', fontSize: '48px', fontWeight: 'bold' }}>{fmt(submission.projectedSavings)}</p>
-          <p style={{ margin: 0, fontSize: '13px', color: '#d1fae5' }}>Our fee if successful: {fmt(fee)} (25%) — you keep {fmt((submission.projectedSavings ?? 0) - fee)}</p>
+          <p style={{ margin: '0 0 10px 0', fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase', color: '#d1fae5' }}>Potential Tax Reduction</p>
+          <p style={{ margin: '0 0 15px 0', fontSize: '48px', fontWeight: 'bold' }}>{fmt(submission.projectedSavings)}</p>
+          <p style={{ margin: 0, fontSize: '12px', color: '#d1fae5', fontStyle: 'italic' }}>
+            Fee: 25% of total taxes saved (if successful)
+          </p>
         </div>
 
         <div style={{ background: '#fff', borderRadius: '12px', padding: '32px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>

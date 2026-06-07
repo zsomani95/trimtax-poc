@@ -77,11 +77,13 @@ export default function LoginPage() {
               placeholder="you@example.com"
               style={{
                 width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
+                padding: '12px',
+                border: '1px solid #ccc',
                 borderRadius: '6px',
-                fontSize: '14px',
+                fontSize: '16px',
                 boxSizing: 'border-box',
+                color: '#1f2937',
+                backgroundColor: '#fff',
               }}
             />
           </div>
@@ -97,11 +99,13 @@ export default function LoginPage() {
               placeholder="••••••••"
               style={{
                 width: '100%',
-                padding: '10px',
-                border: '1px solid #ddd',
+                padding: '12px',
+                border: '1px solid #ccc',
                 borderRadius: '6px',
-                fontSize: '14px',
+                fontSize: '16px',
                 boxSizing: 'border-box',
+                color: '#1f2937',
+                backgroundColor: '#fff',
               }}
             />
           </div>

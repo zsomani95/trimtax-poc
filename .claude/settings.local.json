@@ -10,7 +10,8 @@
       "Bash(bash /tmp/phase3-test.sh)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(npm run *)"
     ]
   }
 }

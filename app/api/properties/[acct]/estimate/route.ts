@@ -88,7 +88,7 @@ export async function GET(
     const w = winsorize(ppsfs)
     const medPpsf = median(w)
     const argued = Math.round(medPpsf * Number(subject.bld_ar))
-    const savings = Math.max(0, Number(subject.cur_appr_val) - argued)
+    const savings = Number(subject.cur_appr_val) - argued
     const cv = stdDev(w) / medPpsf
     const overage = (Number(subject.cur_appr_val) / Number(subject.bld_ar)) / medPpsf - 1
     const confidence =
@@ -96,15 +96,17 @@ export async function GET(
         : ppsfs.length >= 10 ? 'medium'
           : 'low'
 
+    const savingsMin = Math.round(Math.max(savings, 0) * 0.7)
+    const savingsMax = Math.max(savings, 0)
+
     return NextResponse.json({
       subject,
       comps_count: ppsfs.length,
       median_ppsf: Math.round(medPpsf * 100) / 100,
       argued_value: argued,
       savings,
-      savings_min: Math.round(savings * 0.7),
-      savings_max: savings,
-      contingency_fee: Math.round(savings * 0.25),
+      savings_min: savingsMin,
+      savings_max: savingsMax,
       confidence,
       comp_basis: hasNbhd ? 'neighborhood' : 'zip',
     })

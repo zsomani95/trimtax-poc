@@ -110,11 +110,13 @@ export default function HomePage() {
                 autoFocus
                 style={{
                   padding: '14px',
-                  border: '1px solid #ddd',
+                  border: '1px solid #999',
                   borderRadius: '8px',
                   fontSize: '16px',
                   boxSizing: 'border-box',
                   fontFamily: 'inherit',
+                  color: '#1f2937',
+                  backgroundColor: '#fff',
                 }}
               />
               <button
