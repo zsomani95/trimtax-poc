@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"http://localhost:3000/api/properties/0750110000007/estimate\")",
+      "Bash(curl -s \"http://localhost:3000/intake\")",
+      "Bash(curl -s \"http://localhost:3000/api/properties/search?q=houston\")",
+      "Bash(curl -s \"http://localhost:3000/api/properties/0041410000037/estimate\")",
+      "Bash(curl -s \"http://localhost:3000/sign/1\")",
+      "Bash(cat)",
+      "Bash(bash /tmp/phase3-test.sh)"
+    ]
+  }
+}
