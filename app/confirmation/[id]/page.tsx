@@ -1,188 +1,195 @@
-import { db } from '@/lib/db'
-import { submissions } from '@/lib/db/schema'
-import { eq } from 'drizzle-orm'
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
+'use client'
 
-const colors = {
-  primary: '#059669', primaryDark: '#047857', dark: '#0f172a',
-  darkText: '#111827', white: '#fff', gray: '#6b7280',
-  grayLight: '#f3f4f6',
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import TrimTaxLogo from '@/components/TrimTaxLogo'
+
+const C = {
+  primary: '#1e3a5f', primaryDark: '#152e4d', primaryLight: '#e8eef6',
+  dark: '#0f172a', darkAlt: '#1e293b', darkText: '#111827',
+  white: '#ffffff', gray: '#6b7280', grayLight: '#f3f4f6',
+  grayBorder: '#e5e7eb', error: '#dc2626', accent: '#2563eb',
 }
 
-export default async function ConfirmationPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
-  const [submission] = await db
-    .select()
-    .from(submissions)
-    .where(eq(submissions.id, parseInt(id)))
+interface Submission {
+  id: number
+  propertyAddress: string
+  county: string
+  cadValue: number | null
+  arguedValue: number | null
+  projectedSavings: number | null
+  status: string
+  createdAt: string
+  hearingDate: string | null
+}
 
-  if (!submission) notFound()
+export default function ConfirmationPage() {
+  const params = useParams()
+  const id = params.id as string
 
-  const fmt = (n: number | null) =>
-    n !== null
-      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-      : '—'
+  const [submission, setSubmission] = useState<Submission | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    loadSubmission()
+  }, [id])
+
+  const loadSubmission = async () => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('authToken')
+      const res = await fetch(`/api/submissions/${id}`, {
+        headers: { ...(token && { 'Authorization': `Bearer ${token}` }) },
+      })
+      const data = await res.json()
+      if (data.error) { setError(data.error) }
+      else { setSubmission(data) }
+    } catch { setError('Failed to load submission.') }
+    finally { setLoading(false) }
+  }
+
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: C.grayLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: C.gray, fontSize: '16px' }}>
+          <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite', marginRight: '8px' }}>⏳</span>
+          Loading...
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !submission) {
+    return (
+      <div style={{ minHeight: '100vh', background: C.grayLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: '#991b1b', fontSize: '16px', fontWeight: 500 }}>
+          Error: {error || 'Submission not found'}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <main style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #1e293b, #0f172a)' }}>
-      {/* Home Link */}
-      <div style={{ padding: '16px 20px', textAlign: 'center' }}>
-        <Link href="/" style={{ color: '#aaa', textDecoration: 'none', fontSize: '14px' }}>
-          ← Back to Home
+    <div style={{ minHeight: '100vh', background: C.grayLight, display: 'flex', flexDirection: 'column' }}>
+      <header style={{
+        padding: '16px 40px', background: C.white, borderBottom: `1px solid ${C.grayBorder}`,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+          <TrimTaxLogo size={140} />
         </Link>
-      </div>
+        <Link
+          href="/dashboard"
+          style={{ color: C.primary, textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}
+        >
+          Dashboard →
+        </Link>
+      </header>
 
-      <div style={{ display: 'flex', alignItems: 'center', minHeight: 'calc(100vh - 60px)', padding: '20px' }}>
-        <div style={{ maxWidth: '700px', margin: '0 auto', width: '100%' }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+        <div style={{ maxWidth: '560px', width: '100%', textAlign: 'center' }}>
+          {/* Success Icon */}
+          <div style={{
+            width: '80px', height: '80px', borderRadius: '50%', background: '#dcfce7',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 24px', fontSize: '40px',
+          }}>
+            ✅
+          </div>
 
-        <div style={{ background: '#fff', borderRadius: '12px', padding: '48px 40px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)', marginBottom: '24px' }}>
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            {/* Success Icon with Animation */}
-            <div style={{
-              width: '120px',
-              height: '120px',
-              margin: '0 auto 20px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              position: 'relative'
-            }}>
-              <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%', height: '100%' }}>
-                <circle cx="60" cy="60" r="55" fill="none" stroke="#059669" strokeWidth="2" opacity="0.2"/>
-                <circle cx="60" cy="60" r="45" fill="#059669" opacity="0.08"/>
-                <path d="M 35 60 L 50 75 L 85 40" stroke="#059669" strokeWidth="4" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="25" cy="25" r="3" fill="#059669" opacity="0.6"/>
-                <circle cx="95" cy="30" r="3" fill="#059669" opacity="0.6"/>
-                <circle cx="100" cy="90" r="3" fill="#059669" opacity="0.6"/>
-              </svg>
+          <h2 style={{
+            fontFamily: "'Merriweather', serif", fontSize: '32px', fontWeight: 900,
+            color: C.primary, margin: '0 0 12px 0', letterSpacing: '-0.5px',
+          }}>
+            Protest Filed Successfully!
+          </h2>
+          <p style={{ color: C.gray, fontSize: '16px', margin: '0 0 32px 0', lineHeight: 1.6 }}>
+            Your protest has been submitted to the {submission.county} County Appraisal District.
+            We'll handle everything from here.
+          </p>
+
+          {/* Details Card */}
+          <div style={{
+            background: C.white, borderRadius: '16px', padding: '32px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: `1px solid ${C.grayBorder}`,
+            marginBottom: '24px', textAlign: 'left',
+          }}>
+            <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: '18px', fontWeight: 900, color: C.primary, margin: '0 0 20px 0' }}>
+              Submission Details
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {[
+                { label: 'Property', value: submission.propertyAddress },
+                { label: 'County', value: `${submission.county} County` },
+                { label: 'CAD Value', value: submission.cadValue ? fmt(submission.cadValue) : 'N/A' },
+                { label: 'Argued Value', value: submission.arguedValue ? fmt(submission.arguedValue) : 'N/A', highlight: true },
+                { label: 'Projected Savings', value: submission.projectedSavings && submission.projectedSavings > 0 ? fmt(submission.projectedSavings) : '$0', highlight: true },
+                { label: 'Filed On', value: new Date(submission.createdAt).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }) },
+              ].map((row, i) => (
+                <div key={i} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '12px 0', borderBottom: i < 5 ? `1px solid ${C.grayLight}` : 'none',
+                  background: row.highlight ? C.primaryLight : 'transparent',
+                  margin: row.highlight ? '0 -16px' : '0', paddingLeft: row.highlight ? '16px' : '0', paddingRight: row.highlight ? '16px' : '0',
+                  borderRadius: row.highlight ? '8px' : '0',
+                }}>
+                  <span style={{ fontWeight: 600, color: C.primary, fontSize: '14px' }}>{row.label}</span>
+                  <span style={{
+                    fontWeight: row.highlight ? 700 : 500, color: row.highlight ? C.primaryDark : C.darkText,
+                    fontSize: '14px',
+                  }}>
+                    {row.value}
+                  </span>
+                </div>
+              ))}
             </div>
-            <h1 style={{ fontSize: '36px', fontWeight: 700, color: '#111827', margin: '0 0 12px 0', letterSpacing: '-0.5px' }}>Protest Filed!</h1>
-            <p style={{ color: '#6b7280', fontSize: '17px', margin: 0, fontWeight: 500, lineHeight: 1.6 }}>Your property tax protest has been successfully submitted to the appraisal district.</p>
           </div>
 
+          {/* Next Steps */}
           <div style={{
-            background: '#dcfce7',
-            border: '1px solid #6ee7b7',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '30px',
+            background: C.primaryLight, border: `1px solid ${C.primaryLight}`,
+            borderRadius: '12px', padding: '24px', marginBottom: '24px', textAlign: 'left',
           }}>
-            <p style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: '#047857' }}>Submission Details</p>
-            <div style={{ fontSize: '13px', lineHeight: '1.8', color: '#166534' }}>
-              <p style={{ margin: '0 0 8px 0' }}>
-                <strong>Submission ID:</strong> #{submission.id}
-              </p>
-              <p style={{ margin: '0 0 8px 0' }}>
-                <strong>Property:</strong> {submission.propertyAddress}
-              </p>
-              <p style={{ margin: '0 0 8px 0' }}>
-                <strong>County:</strong> {submission.county}
-              </p>
-              <p style={{ margin: '0 0 8px 0' }}>
-                <strong>Estimated Savings:</strong> {fmt(submission.projectedSavings)}
-              </p>
-              <p style={{ margin: 0 }}>
-                <strong>Status:</strong> <span style={{ backgroundColor: '#d1fae5', padding: '2px 8px', borderRadius: '4px' }}>Signed & Filed</span>
-              </p>
+            <h4 style={{ margin: '0 0 12px 0', color: C.primaryDark, fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+              What Happens Next
+            </h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '14px', color: C.primary, lineHeight: 1.6 }}>
+              <div>1. TrimTax generates Forms 50-132 & 50-162</div>
+              <div>2. Files with CAD + attends informal hearing</div>
+              <div>3. You're notified of outcome (no action needed)</div>
+              <div>4. If successful, 25% of first-year savings invoiced</div>
             </div>
           </div>
 
-          <div style={{
-            background: '#f3f4f6',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '30px',
-          }}>
-            <p style={{ margin: '0 0 12px 0', fontWeight: 'bold', color: '#1f2937' }}>What Happens Next?</p>
-            <ol style={{ margin: 0, paddingLeft: '20px', fontSize: '14px', lineHeight: '1.8', color: '#4b5563' }}>
-              <li style={{ marginBottom: '8px' }}>
-                <strong>Forms sent to {submission.county} CAD</strong> — Your Forms 50-132 & 50-162 are immediately filed with the appraisal district
-              </li>
-              <li style={{ marginBottom: '8px' }}>
-                <strong>Informal hearing scheduled</strong> — The appraisal district will schedule an informal hearing (usually within 30-60 days)
-              </li>
-              <li style={{ marginBottom: '8px' }}>
-                <strong>You'll receive hearing notice</strong> — Details sent to <strong>{submission.ownerEmail}</strong>
-              </li>
-              <li style={{ marginBottom: '8px' }}>
-                <strong>No action needed from you</strong> — TrimTax handles the hearing and negotiation
-              </li>
-              <li>
-                <strong>Pay fee only if successful</strong> — If we win, 25% of first-year savings is invoiced
-              </li>
-            </ol>
-          </div>
-
-          <div style={{
-            background: '#dbeafe',
-            border: '1px solid #93c5fd',
-            borderRadius: '8px',
-            padding: '15px',
-            marginBottom: '30px',
-            fontSize: '13px',
-            color: '#0369a1',
-            lineHeight: '1.6',
-          }}>
-            <strong>📧 Check your email:</strong> We've sent confirmation & hearing details to {submission.ownerEmail}. Add us to your contacts so notices don't get missed.
-          </div>
-
-          <div style={{ display: 'grid', gap: '12px', marginBottom: '30px' }}>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
             <Link
-              href="/intake"
+              href={`/tracker/${id}`}
               style={{
-                display: 'block',
-                background: '#0066cc',
-                color: '#fff',
-                padding: '12px',
-                borderRadius: '8px',
-                textAlign: 'center',
-                textDecoration: 'none',
-                fontWeight: 'bold',
+                display: 'inline-block', background: C.primary, color: C.white, textDecoration: 'none',
+                fontWeight: 700, fontSize: '15px', padding: '14px 32px', borderRadius: '10px',
+                transition: 'all 0.2s ease',
               }}
             >
-              Submit Another Property
+              Track Your Protest →
             </Link>
             <Link
-              href="/"
+              href="/dashboard"
               style={{
-                display: 'block',
-                background: '#f3f4f6',
-                color: '#111827',
-                padding: '12px',
-                borderRadius: '8px',
-                textAlign: 'center',
-                textDecoration: 'none',
-                fontWeight: 'bold',
-                border: '1px solid #ccc',
+                display: 'inline-block', background: C.white, color: C.primary, textDecoration: 'none',
+                fontWeight: 700, fontSize: '15px', padding: '14px 32px', borderRadius: '10px',
+                border: `2px solid ${C.grayBorder}`, transition: 'all 0.2s ease',
               }}
             >
-              Return Home
+              Back to Dashboard
             </Link>
-          </div>
-
-          <div style={{
-            textAlign: 'center',
-            paddingTop: '20px',
-            borderTop: '1px solid #eee',
-            fontSize: '12px',
-            color: '#999',
-          }}>
-            <p style={{ margin: 0 }}>
-              TrimTax is a document preparation service, not a licensed appraisal or legal service.
-            </p>
-            <p style={{ margin: '8px 0 0 0' }}>
-              Questions? Email us at support@trimtax.local
-            </p>
           </div>
         </div>
-
       </div>
-      </div>
-    </main>
+    </div>
   )
 }

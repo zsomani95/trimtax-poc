@@ -27,7 +27,7 @@ export default function PropertyMap({ address }: { address: string }) {
       const coords = { lat: 29.76, lng: -95.37 };
 
       // Initialize map
-      map.current = L.map(mapContainer.current).setView(
+      map.current = L.map(mapContainer.current!).setView(
         [coords.lat, coords.lng],
         14
       );

@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import TrimTaxLogo from '@/components/TrimTaxLogo'
 
-const colors = {
-  primary: '#059669', primaryDark: '#047857', dark: '#0f172a',
-  darkText: '#111827', white: '#fff', gray: '#6b7280',
-  grayLight: '#f3f4f6',
+const C = {
+  primary: '#1e3a5f', primaryDark: '#152e4d', primaryLight: '#e8eef6',
+  dark: '#0f172a', darkAlt: '#1e293b', darkText: '#111827',
+  white: '#ffffff', gray: '#6b7280', grayLight: '#f3f4f6',
+  grayBorder: '#e5e7eb', error: '#dc2626', accent: '#2563eb',
 }
 
 interface Submission {
@@ -23,12 +25,12 @@ interface Submission {
   resultedSavings: number | null
 }
 
-const statusColors: Record<string, { bg: string; text: string; label: string }> = {
-  pending: { bg: '#dbeafe', text: '#0369a1', label: '📋 Pending' },
-  signed: { bg: '#dbeafe', text: '#0369a1', label: '✍️ Signed' },
-  submitted: { bg: '#fef3c7', text: '#92400e', label: '📤 Submitted to CAD' },
-  hearing_scheduled: { bg: '#ede9fe', text: '#6d28d9', label: '📅 Hearing Scheduled' },
-  resolved: { bg: '#dcfce7', text: '#166534', label: '✅ Resolved' },
+const statusColors: Record<string, { bg: string; text: string; label: string; icon: string }> = {
+  pending: { bg: '#e8eef6', text: '#1e3a5f', label: 'Pending', icon: '📋' },
+  signed: { bg: '#e8eef6', text: '#1e3a5f', label: 'Signed', icon: '✍️' },
+  submitted: { bg: '#fef3c7', text: '#92400e', label: 'Submitted to CAD', icon: '📤' },
+  hearing_scheduled: { bg: '#ede9fe', text: '#6d28d9', label: 'Hearing Scheduled', icon: '📅' },
+  resolved: { bg: '#dcfce7', text: '#166534', label: 'Resolved', icon: '✅' },
 }
 
 export default function DashboardPage() {
@@ -39,11 +41,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const token = localStorage.getItem('authToken')
-    if (!token) {
-      router.push('/login')
-      return
-    }
-
+    if (!token) { router.push('/login'); return }
     loadSubmissions()
   }, [router])
 
@@ -51,219 +49,149 @@ export default function DashboardPage() {
     try {
       setLoading(true)
       const token = localStorage.getItem('authToken')
-
-      const response = await fetch('/api/user/submissions', {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch('/api/submissions', {
+        headers: { ...(token && { 'Authorization': `Bearer ${token}` }) },
       })
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          router.push('/login')
-          return
-        }
-        throw new Error('Failed to load submissions')
-      }
-
-      const data = await response.json()
-      setSubmissions(data.submissions || [])
-    } catch (err) {
-      setError('Could not load submissions')
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+      const data = await res.json()
+      if (data.error) { setError(data.error) }
+      else { setSubmissions(data.submissions || []) }
+    } catch { setError('Failed to load submissions.') }
+    finally { setLoading(false) }
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem('authToken')
-    router.push('/login')
-  }
-
-  const fmt = (n: number | null) =>
-    n !== null
-      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-      : '—'
-
-  const getStatusInfo = (status: string) => statusColors[status] || statusColors.pending
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(to bottom right, #1e293b, #0f172a)', padding: '20px' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
-          <div>
-            <Link href="/" style={{ textDecoration: 'none', color: '#aaa', marginBottom: '12px', display: 'inline-block', fontSize: '14px' }}>
-              ← Back to Home
-            </Link>
-            <h1 style={{ fontSize: '32px', fontWeight: 'bold', color: '#fff', margin: '0 0 8px 0' }}>TrimTax Dashboard</h1>
-            <p style={{ color: '#aaa', margin: 0, fontSize: '14px' }}>Track all your property tax protests</p>
+    <div style={{ minHeight: '100vh', background: C.grayLight, display: 'flex', flexDirection: 'column' }}>
+      <header style={{
+        padding: '16px 40px', background: C.white, borderBottom: `1px solid ${C.grayBorder}`,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+          <TrimTaxLogo size={140} />
+        </Link>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <Link
+            href="/intake"
+            style={{
+              background: C.primary, color: C.white, textDecoration: 'none',
+              fontWeight: 600, fontSize: '14px', padding: '10px 24px', borderRadius: '8px',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            New Protest
+          </Link>
+        </div>
+      </header>
+
+      <div style={{ flex: 1, padding: '40px', maxWidth: '1100px', margin: '0 auto', width: '100%' }}>
+        <div style={{ marginBottom: '40px' }}>
+          <h2 style={{
+            fontFamily: "'Merriweather', serif", fontSize: '32px', fontWeight: 900,
+            color: C.primary, margin: '0 0 8px 0', letterSpacing: '-0.5px',
+          }}>
+            Your Protests
+          </h2>
+          <p style={{ color: C.gray, fontSize: '15px', margin: 0, fontWeight: 500 }}>
+            Track the status of your property tax protests
+          </p>
+        </div>
+
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '60px', color: C.gray, fontSize: '16px' }}>
+            <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite', marginRight: '8px' }}>⏳</span>
+            Loading your submissions...
           </div>
-          <div style={{ display: 'flex', gap: '12px' }}>
+        )}
+
+        {error && (
+          <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '10px', padding: '16px', color: '#991b1b', fontSize: '14px', fontWeight: 500, marginBottom: '20px' }}>
+            Error: {error}
+          </div>
+        )}
+
+        {!loading && !error && submissions.length === 0 && (
+          <div style={{
+            background: C.white, borderRadius: '16px', padding: '60px 40px', textAlign: 'center',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: `1px solid ${C.grayBorder}`,
+          }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🏠</div>
+            <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: '22px', fontWeight: 900, color: C.primary, margin: '0 0 8px 0' }}>
+              No protests yet
+            </h3>
+            <p style={{ color: C.gray, fontSize: '15px', margin: '0 0 24px 0' }}>
+              Start by searching for your property to file a protest.
+            </p>
             <Link
               href="/intake"
               style={{
-                background: '#0066cc',
-                color: '#fff',
-                padding: '10px 20px',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                fontWeight: 'bold',
-                fontSize: '14px',
+                display: 'inline-block', background: C.primary, color: C.white, textDecoration: 'none',
+                fontWeight: 700, fontSize: '15px', padding: '14px 32px', borderRadius: '10px',
+                transition: 'all 0.2s ease',
               }}
             >
-              + New Property
-            </Link>
-            <button
-              onClick={handleLogout}
-              style={{
-                background: '#374151',
-                color: '#fff',
-                padding: '10px 20px',
-                borderRadius: '6px',
-                border: 'none',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                cursor: 'pointer',
-              }}
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-
-        {/* Summary Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '30px' }}>
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
-            <p style={{ color: colors.gray, fontSize: '13px', margin: '0 0 8px 0', fontWeight: 500 }}>Total Properties</p>
-            <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827', margin: 0 }}>{submissions.length}</p>
-          </div>
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
-            <p style={{ color: '#666', fontSize: '13px', margin: '0 0 8px 0' }}>Total Potential Savings</p>
-            <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#047857', margin: 0 }}>
-              {fmt(submissions.reduce((sum, s) => sum + (s.projectedSavings || 0), 0))}
-            </p>
-          </div>
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '20px' }}>
-            <p style={{ color: '#666', fontSize: '13px', margin: '0 0 8px 0' }}>Resolved</p>
-            <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#0066cc', margin: 0 }}>
-              {submissions.filter(s => s.status === 'resolved').length}
-            </p>
-          </div>
-        </div>
-
-        {/* Submissions List */}
-        {loading ? (
-          <div style={{ textAlign: 'center', color: '#aaa', padding: '40px' }}>Loading submissions...</div>
-        ) : error ? (
-          <div style={{ background: '#fee2e2', border: '1px solid #dc2626', color: '#991b1b', padding: '20px', borderRadius: '8px', marginBottom: '20px' }}>
-            {error}
-          </div>
-        ) : submissions.length === 0 ? (
-          <div style={{ background: '#fff', borderRadius: '12px', padding: '40px', textAlign: 'center' }}>
-            <p style={{ color: colors.gray, marginBottom: '20px', fontSize: '16px', fontWeight: 500 }}>No properties yet. Start a new submission to see it here.</p>
-            <Link
-              href="/intake"
-              style={{
-                display: 'inline-block',
-                background: '#0066cc',
-                color: '#fff',
-                padding: '12px 24px',
-                borderRadius: '6px',
-                textDecoration: 'none',
-                fontWeight: 'bold',
-              }}
-            >
-              Submit Your First Property
+              File Your First Protest →
             </Link>
           </div>
-        ) : (
-          <div style={{ display: 'grid', gap: '12px' }}>
-            {submissions.map((sub) => {
-              const statusInfo = getStatusInfo(sub.status)
+        )}
+
+        {!loading && submissions.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {submissions.map(sub => {
+              const status = statusColors[sub.status] || statusColors.pending
               return (
-                <Link
-                  key={sub.id}
-                  href={`/tracker/${sub.id}`}
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'auto 1fr auto auto',
-                    gap: '20px',
-                    alignItems: 'center',
-                    background: '#fff',
-                    borderRadius: '12px',
-                    padding: '20px 24px',
-                    textDecoration: 'none',
-                    color: '#111827',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                    border: '1px solid #e5e7eb',
-                    position: 'relative',
-                    overflow: 'hidden'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.12)'
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.08)'
-                    e.currentTarget.style.transform = 'translateY(0)'
-                  }}
+                <div key={sub.id} style={{
+                  background: C.white, borderRadius: '16px', padding: '24px',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: `1px solid ${C.grayBorder}`,
+                  transition: 'all 0.2s ease', cursor: 'pointer',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.08)' }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.06)' }}
+                  onClick={() => router.push(`/tracker/${sub.id}`)}
                 >
-                  {/* Property Icon Background */}
-                  <div style={{
-                    width: '56px',
-                    height: '56px',
-                    borderRadius: '10px',
-                    background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '28px',
-                    flexShrink: 0
-                  }}>
-                    🏡
-                  </div>
-
-                  {/* Property Details */}
-                  <div>
-                    <p style={{ fontWeight: 700, margin: '0 0 8px 0', fontSize: '16px', color: '#111827' }}>{sub.propertyAddress}</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'auto auto auto', gap: '16px', fontSize: '13px', color: '#6b7280' }}>
-                      <span>{sub.county} County</span>
-                      <span>•</span>
-                      <span>CAD: {fmt(sub.cadValue)}</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                    <div style={{ flex: 1 }}>
+                      <h3 style={{ fontSize: '17px', fontWeight: 700, color: C.primary, margin: '0 0 4px 0' }}>
+                        {sub.propertyAddress}
+                      </h3>
+                      <p style={{ color: C.gray, fontSize: '13px', margin: '2px 0 0 0' }}>
+                        {sub.county} County · Filed {new Date(sub.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
                     </div>
-                    <p style={{ color: '#059669', fontWeight: 700, fontSize: '14px', margin: '8px 0 0 0' }}>
-                      💰 {fmt(sub.projectedSavings)}/year
-                    </p>
-                  </div>
-
-                  {/* Status Badge */}
-                  <div style={{ textAlign: 'right' }}>
-                    <div
-                      style={{
-                        display: 'inline-block',
-                        background: statusInfo.bg,
-                        color: statusInfo.text,
-                        padding: '8px 14px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        letterSpacing: '0.3px',
-                      }}
-                    >
-                      {statusInfo.label}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                      <span style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        padding: '6px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: 600,
+                        background: status.bg, color: status.text,
+                      }}>
+                        {status.icon} {status.label}
+                      </span>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.gray} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
                     </div>
                   </div>
 
-                  {/* Date */}
-                  <div style={{ textAlign: 'right', minWidth: '100px' }}>
-                    <p style={{ color: '#9ca3af', fontSize: '12px', margin: '0 0 4px 0', fontWeight: 500 }}>Submitted</p>
-                    <p style={{ color: '#6b7280', fontSize: '12px', margin: 0, fontWeight: 600 }}>
-                      {new Date(sub.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </Link>
+                  {sub.cadValue && sub.arguedValue && (
+                    <div style={{ display: 'flex', gap: '24px', marginTop: '16px', paddingTop: '16px', borderTop: `1px solid ${C.grayLight}` }}>
+                      <div>
+                        <p style={{ margin: '0 0 4px 0', color: C.gray, fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>CAD Value</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: '16px', color: C.darkText }}>{fmt(sub.cadValue)}</p>
+                      </div>
+                      <div>
+                        <p style={{ margin: '0 0 4px 0', color: C.gray, fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Argued Value</p>
+                        <p style={{ margin: 0, fontWeight: 700, fontSize: '16px', color: C.primary }}>{fmt(sub.arguedValue)}</p>
+                      </div>
+                      {sub.projectedSavings && sub.projectedSavings > 0 && (
+                        <div>
+                          <p style={{ margin: '0 0 4px 0', color: C.gray, fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Projected Savings</p>
+                          <p style={{ margin: 0, fontWeight: 700, fontSize: '16px', color: '#16a34a' }}>{fmt(sub.projectedSavings)}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               )
             })}
           </div>

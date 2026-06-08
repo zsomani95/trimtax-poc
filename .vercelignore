@@ -1,0 +1,47 @@
+# Dependencies (Vercel installs these during build)
+node_modules
+
+# Build output
+.next
+out
+build
+
+# Git
+.git
+.gitignore
+
+# Scripts with large CSV data
+scripts/*.csv
+scripts/filter-*.js
+scripts/import-*.js
+scripts/add-indexes.js
+
+# Dev logs
+dev.log
+
+# Documentation (not needed for deployment)
+*.md
+!README.md
+
+# Claude/IDE config
+.claude
+
+# Test/scratch files
+ready
+taxtrim
+
+# HTML mockups
+trimtax-architecture.html
+trimtax-lego.html
+trimtax-wireframes.html
+
+# Setup scripts
+setup-security-hooks.bat
+setup-security-hooks.sh
+
+# Env files
+.env.example
+.env.local
+
+# Vercel
+.vercel

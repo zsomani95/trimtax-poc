@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     createForm50162(page2, submission, signature)
 
     const pdfBytes = await pdfDoc.save()
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(pdfBytes as unknown as BodyInit, {
       headers: {
         'Content-Type': 'application/pdf',
         'Content-Disposition': `attachment; filename="protest-forms-${submission.id}.pdf"`,

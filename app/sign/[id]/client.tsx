@@ -1,359 +1,329 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, useRef } from 'react'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
-import SignatureCanvas from 'react-signature-canvas'
+import TrimTaxLogo from '@/components/TrimTaxLogo'
 
-const colors = {
-  primary: '#059669', primaryDark: '#047857', dark: '#0f172a',
-  darkText: '#111827', white: '#fff', gray: '#6b7280',
-  grayLight: '#f3f4f6',
+const C = {
+  primary: '#1e3a5f', primaryDark: '#152e4d', primaryLight: '#e8eef6',
+  dark: '#0f172a', darkAlt: '#1e293b', darkText: '#111827',
+  white: '#ffffff', gray: '#6b7280', grayLight: '#f3f4f6',
+  grayBorder: '#e5e7eb', error: '#dc2626', accent: '#2563eb',
 }
 
-interface SignPageClientProps {
-  submission: {
-    id: number
-    ownerName: string
-    ownerEmail: string
-    propertyAddress: string
-    county: string
-    cadValue: number | null
-    arguedValue: number | null
-    projectedSavings: number | null
-  }
+interface Submission {
+  id: number
+  propertyAddress: string
+  county: string
+  cadValue: number | null
+  arguedValue: number | null
+  projectedSavings: number | null
+  status: string
+  ownerName: string
+  ownerEmail: string
+  ownerPhone: string
 }
 
-export default function SignPageClient({
-  submission,
-}: SignPageClientProps) {
+export default function SignPageClient() {
   const router = useRouter()
-  const sigCanvasRef = useRef<SignatureCanvas>(null)
-  const [step, setStep] = useState(1)
-  const [isGenerating, setIsGenerating] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const params = useParams()
+  const id = params.id as string
+
+  const [submission, setSubmission] = useState<Submission | null>(null)
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [signatureEmpty, setSignatureEmpty] = useState(true)
+  const [signature, setSignature] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [isDrawing, setIsDrawing] = useState(false)
+  const [hasSignature, setHasSignature] = useState(false)
 
-  const handleClearSignature = () => {
-    sigCanvasRef.current?.clear()
-    setSignatureEmpty(true)
+  useEffect(() => {
+    loadSubmission()
+  }, [id])
+
+  const loadSubmission = async () => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('authToken')
+      const res = await fetch(`/api/submissions/${id}`, {
+        headers: { ...(token && { 'Authorization': `Bearer ${token}` }) },
+      })
+      const data = await res.json()
+      if (data.error) { setError(data.error) }
+      else { setSubmission(data) }
+    } catch { setError('Failed to load submission.') }
+    finally { setLoading(false) }
   }
 
-  const handleGeneratePDF = async () => {
-    if (signatureEmpty) {
-      setError('Please sign before generating documents')
-      return
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true)
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.beginPath()
+    const rect = canvas.getBoundingClientRect()
+    const x = ('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left
+    const y = ('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top
+    ctx.moveTo(x, y)
+    setHasSignature(true)
+  }
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing) return
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    const rect = canvas.getBoundingClientRect()
+    const x = ('touches' in e ? e.touches[0].clientX : e.clientX) - rect.left
+    const y = ('touches' in e ? e.touches[0].clientY : e.clientY) - rect.top
+    ctx.lineTo(x, y)
+    ctx.stroke()
+  }
+
+  const stopDrawing = () => {
+    setIsDrawing(false)
+    const canvas = canvasRef.current
+    if (canvas) {
+      setSignature(canvas.toDataURL())
     }
+  }
 
-    setIsGenerating(true)
-    setError('')
+  const clearSignature = () => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    setHasSignature(false)
+    setSignature('')
+  }
 
+  const handleSign = async () => {
+    if (!signature) return
+    setSubmitting(true)
+    setSubmitError('')
     try {
-      const signatureData = sigCanvasRef.current?.toDataURL('image/png')
-
-      const response = await fetch('/api/generate-pdf', {
+      const token = localStorage.getItem('authToken')
+      const res = await fetch(`/api/submissions/${id}/sign`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          submissionId: submission.id,
-          signature: signatureData,
-          submission,
-        }),
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        body: JSON.stringify({ signature }),
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to generate PDF')
-      }
-
-      const blob = await response.blob()
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `protest-forms-${submission.id}.pdf`
-      a.click()
-      window.URL.revokeObjectURL(url)
-
-      setStep(3)
-    } catch (err) {
-      setError(String(err))
-    } finally {
-      setIsGenerating(false)
-    }
+      const data = await res.json()
+      if (data.error) { setSubmitError(data.error) }
+      else { router.push(`/confirmation/${id}`) }
+    } catch { setSubmitError('Connection failed.') }
+    finally { setSubmitting(false) }
   }
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true)
-    setError('')
+  const fmt = (n: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
 
-    try {
-      const signatureData = sigCanvasRef.current?.toDataURL('image/png')
-
-      const response = await fetch(`/api/submissions/${submission.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          signatureImage: signatureData,
-          signedAt: new Date().toISOString(),
-          status: 'signed',
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to save signature')
-      }
-
-      router.push(`/confirmation/${submission.id}`)
-    } catch (err) {
-      setError(String(err))
-    } finally {
-      setIsSubmitting(false)
-    }
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: C.grayLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: C.gray, fontSize: '16px' }}>
+          <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite', marginRight: '8px' }}>⏳</span>
+          Loading...
+        </div>
+      </div>
+    )
   }
 
-  const fmt = (n: number | null) =>
-    n !== null
-      ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
-      : '—'
+  if (error || !submission) {
+    return (
+      <div style={{ minHeight: '100vh', background: C.grayLight, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: '#991b1b', fontSize: '16px', fontWeight: 500 }}>
+          Error: {error || 'Submission not found'}
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div>
-      <style>{`
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-        .loading { animation: pulse 1s infinite; }
-      `}</style>
-
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid #eee', marginBottom: '20px' }}>
-        <Link href="/" style={{ textDecoration: 'none', color: '#111827' }}>
-          <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>← TrimTax</h1>
+    <div style={{ minHeight: '100vh', background: C.grayLight, display: 'flex', flexDirection: 'column' }}>
+      <header style={{
+        padding: '16px 40px', background: C.white, borderBottom: `1px solid ${C.grayBorder}`,
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      }}>
+        <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+          <TrimTaxLogo size={140} />
         </Link>
+        <Link
+          href="/dashboard"
+          style={{ color: C.primary, textDecoration: 'none', fontWeight: 600, fontSize: '14px' }}
+        >
+          Dashboard →
+        </Link>
+      </header>
+
+      <div style={{ flex: 1, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 20px' }}>
+        <div style={{ maxWidth: '640px', width: '100%' }}>
+          {/* Step Indicator */}
+          <div style={{ display: 'flex', gap: '0', marginBottom: '40px', alignItems: 'center', background: C.white, borderRadius: '16px', padding: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+            {[
+              { num: 1, label: 'Find Property', done: true },
+              { num: 2, label: 'Review Estimate', done: true },
+              { num: 3, label: 'E-Sign', active: true },
+            ].map((s, i) => (
+              <div key={s.num} style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 16px',
+                  borderRadius: '10px', background: s.active ? C.primaryLight : 'transparent',
+                  transition: 'all 0.3s ease', flex: 1, justifyContent: 'center',
+                }}>
+                  <div style={{
+                    width: '28px', height: '28px', borderRadius: '50%', display: 'flex',
+                    alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '12px',
+                    background: s.done ? C.primary : s.active ? C.primary : C.grayBorder,
+                    color: s.done || s.active ? C.white : C.gray, flexShrink: 0,
+                    transition: 'all 0.3s ease',
+                  }}>
+                    {s.done ? '✓' : s.num}
+                  </div>
+                  <span style={{
+                    fontSize: '12px', fontWeight: 600, color: s.active ? C.primary : s.done ? C.primary : C.gray,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {s.label}
+                  </span>
+                </div>
+                {i < 2 && (
+                  <div style={{
+                    width: '20px', height: '2px', background: s.done ? C.primary : C.grayBorder,
+                    transition: 'all 0.3s ease', flexShrink: 0,
+                  }} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Review Summary */}
+          <div style={{
+            background: C.white, borderRadius: '16px', padding: '40px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: `1px solid ${C.grayBorder}`,
+            marginBottom: '24px',
+          }}>
+            <div style={{ marginBottom: '28px' }}>
+              <h2 style={{
+                fontFamily: "'Merriweather', serif", fontSize: '28px', fontWeight: 900,
+                color: C.primary, margin: '0 0 8px 0', letterSpacing: '-0.5px',
+              }}>
+                Review & Sign
+              </h2>
+              <p style={{ color: C.gray, fontSize: '15px', margin: 0, fontWeight: 500 }}>
+                Please verify and sign below to authorize your protest
+              </p>
+            </div>
+
+            <div style={{ marginBottom: '24px' }}>
+              {[
+                { label: 'Property', value: submission.propertyAddress },
+                { label: 'County', value: `${submission.county} County` },
+                { label: 'CAD Value', value: submission.cadValue ? fmt(submission.cadValue) : 'N/A' },
+                { label: 'Argued Value', value: submission.arguedValue ? fmt(submission.arguedValue) : 'N/A', highlight: true },
+                { label: 'Projected Savings', value: submission.projectedSavings && submission.projectedSavings > 0 ? fmt(submission.projectedSavings) : '$0', highlight: true },
+              ].map((row, i) => (
+                <div key={i} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '14px 0', borderBottom: i < 4 ? `1px solid ${C.grayLight}` : 'none',
+                  background: row.highlight ? C.primaryLight : 'transparent',
+                  margin: row.highlight ? '0 -16px' : '0', paddingLeft: row.highlight ? '16px' : '0', paddingRight: row.highlight ? '16px' : '0',
+                  borderRadius: row.highlight ? '8px' : '0',
+                }}>
+                  <span style={{ fontWeight: 600, color: C.primary, fontSize: '14px' }}>{row.label}</span>
+                  <span style={{
+                    fontWeight: row.highlight ? 700 : 500, color: row.highlight ? C.primaryDark : C.darkText,
+                    fontSize: '14px',
+                  }}>
+                    {row.value}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Signature Pad */}
+          <div style={{
+            background: C.white, borderRadius: '16px', padding: '40px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)', border: `1px solid ${C.grayBorder}`,
+          }}>
+            <div style={{ marginBottom: '24px' }}>
+              <h3 style={{ fontFamily: "'Merriweather', serif", fontSize: '20px', fontWeight: 900, color: C.primary, margin: '0 0 8px 0' }}>
+                Your Signature
+              </h3>
+              <p style={{ color: C.gray, fontSize: '14px', margin: 0 }}>
+                Draw your signature below using your mouse or finger
+              </p>
+            </div>
+
+            <div style={{
+              border: `2px solid ${hasSignature ? C.primary : C.grayBorder}`,
+              borderRadius: '12px', overflow: 'hidden', marginBottom: '16px',
+              transition: 'all 0.2s ease', background: C.white,
+            }}>
+              <canvas
+                ref={canvasRef}
+                width={500}
+                height={200}
+                style={{ width: '100%', height: '200px', cursor: 'crosshair', display: 'block' }}
+                onMouseDown={startDrawing}
+                onMouseMove={draw}
+                onMouseUp={stopDrawing}
+                onMouseLeave={stopDrawing}
+                onTouchStart={startDrawing}
+                onTouchMove={draw}
+                onTouchEnd={stopDrawing}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
+              <button
+                onClick={clearSignature}
+                style={{
+                  padding: '10px 20px', background: C.grayLight, color: C.darkText,
+                  border: `1px solid ${C.grayBorder}`, borderRadius: '8px', cursor: 'pointer',
+                  fontWeight: 600, fontSize: '13px',
+                }}
+              >
+                Clear
+              </button>
+              <span style={{ color: C.gray, fontSize: '12px', alignSelf: 'center' }}>
+                {hasSignature ? '✓ Signature captured' : 'Draw your signature above'}
+              </span>
+            </div>
+
+            {submitError && (
+              <div style={{ background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '10px', padding: '14px 16px', marginBottom: '20px', color: '#991b1b', fontSize: '14px', fontWeight: 500 }}>
+                ✗ {submitError}
+              </div>
+            )}
+
+            <button
+              onClick={handleSign}
+              disabled={!hasSignature || submitting}
+              style={{
+                width: '100%', padding: '14px', background: !hasSignature || submitting ? '#d1d5db' : C.primary,
+                color: C.white, border: 'none', borderRadius: '10px', fontWeight: 700,
+                fontSize: '15px', cursor: !hasSignature || submitting ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease', letterSpacing: '0.3px',
+              }}
+              onMouseEnter={e => { if (hasSignature && !submitting) e.currentTarget.style.background = C.primaryDark }}
+              onMouseLeave={e => { if (hasSignature && !submitting) e.currentTarget.style.background = C.primary }}
+            >
+              {submitting ? '⏳ Submitting...' : 'Sign & File My Protest →'}
+            </button>
+          </div>
+        </div>
       </div>
-
-      <div style={{ maxWidth: '700px', margin: '0 auto', fontFamily: 'system-ui', padding: '0 20px 20px 20px' }}>
-        <h2 style={{ marginTop: 0, marginBottom: '8px', fontSize: '28px' }}>File Your Protest</h2>
-        <p style={{ color: colors.gray, marginTop: 0, marginBottom: '30px', fontSize: '16px', fontWeight: 500 }}>Complete e-signature and we'll handle the rest</p>
-
-      {/* STEP 1: REVIEW */}
-      {step === 1 && (
-        <div style={{ border: '1px solid #ddd', padding: '24px', borderRadius: '8px', backgroundColor: '#fff' }}>
-          <h2 style={{ marginTop: 0 }}>Review Your Submission</h2>
-
-          <table style={{ width: '100%', marginBottom: '20px', fontSize: '14px', borderCollapse: 'collapse' }}>
-            <tbody>
-              <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold', width: '40%' }}>Property</td>
-                <td style={{ padding: '10px' }}>{submission.propertyAddress}</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>County</td>
-                <td style={{ padding: '10px' }}>{submission.county}</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>Owner</td>
-                <td style={{ padding: '10px' }}>{submission.ownerName}</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #eee' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold' }}>CAD Value</td>
-                <td style={{ padding: '10px' }}>{fmt(submission.cadValue)}</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid #eee', backgroundColor: '#f0fdf4' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold', color: '#047857' }}>Argued Value</td>
-                <td style={{ padding: '10px', fontWeight: 'bold', color: '#047857' }}>{fmt(submission.arguedValue)}</td>
-              </tr>
-              <tr style={{ backgroundColor: '#f0fdf4' }}>
-                <td style={{ padding: '10px', fontWeight: 'bold', color: '#047857' }}>Est. Savings</td>
-                <td style={{ padding: '10px', fontWeight: 'bold', color: '#047857' }}>{fmt(submission.projectedSavings)}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div style={{
-            backgroundColor: '#dbeafe',
-            border: '1px solid #93c5fd',
-            padding: '15px',
-            borderRadius: '4px',
-            marginBottom: '20px',
-            fontSize: '13px',
-            lineHeight: '1.6',
-          }}>
-            <strong>Documents to sign:</strong><br />
-            • <strong>Form 50-132:</strong> Property Value Protest (§41.41 market value challenge)<br />
-            • <strong>Form 50-162:</strong> Agent Authorization (TrimTax document preparation service)
-          </div>
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={() => router.back()}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: '#fff',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-              }}
-            >
-              Back
-            </button>
-            <button
-              onClick={() => setStep(2)}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: '#0066cc',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-              }}
-            >
-              Continue to Signature
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 2: SIGN */}
-      {step === 2 && (
-        <div style={{ border: '1px solid #ddd', padding: '24px', borderRadius: '8px', backgroundColor: '#fff' }}>
-          <h2 style={{ marginTop: 0 }}>E-Signature</h2>
-          <p style={{ color: colors.gray, fontSize: '16px', fontWeight: 500 }}>Sign above. Your signature authorizes TrimTax to file your protest.</p>
-
-          <div style={{
-            border: '2px dashed #ccc',
-            borderRadius: '8px',
-            height: '200px',
-            marginBottom: '12px',
-            backgroundColor: '#fafafa',
-            cursor: 'crosshair',
-            overflow: 'hidden',
-          }}>
-            <SignatureCanvas
-              ref={sigCanvasRef}
-              canvasProps={{
-                style: { width: '100%', height: '100%' },
-              }}
-              onEnd={() => setSignatureEmpty(sigCanvasRef.current?.isEmpty() ?? true)}
-            />
-          </div>
-
-          <button
-            onClick={handleClearSignature}
-            style={{
-              width: '100%',
-              padding: '10px',
-              marginBottom: '15px',
-              backgroundColor: '#f3f4f6',
-              border: '1px solid #ccc',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              color: '#666',
-            }}
-          >
-            Clear Signature
-          </button>
-
-          {error && <div style={{ color: '#d32f2f', marginBottom: '15px', fontSize: '14px' }}>Error: {error}</div>}
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={() => setStep(1)}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: '#fff',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-              }}
-            >
-              Back
-            </button>
-            <button
-              onClick={handleGeneratePDF}
-              disabled={isGenerating || signatureEmpty}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: isGenerating || signatureEmpty ? '#ccc' : '#047857',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: isGenerating || signatureEmpty ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold',
-                opacity: isGenerating || signatureEmpty ? 0.6 : 1,
-              }}
-            >
-              {isGenerating ? '⏳ Generating...' : 'Generate PDFs'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* STEP 3: CONFIRMATION */}
-      {step === 3 && (
-        <div style={{ border: '1px solid #ddd', padding: '24px', borderRadius: '8px', backgroundColor: '#f0fdf4' }}>
-          <h2 style={{ marginTop: 0, color: '#047857' }}>✓ Documents Generated</h2>
-          <p style={{ color: '#666' }}>
-            Your protest forms have been downloaded. Now submit your signature to complete filing.
-          </p>
-
-          <div style={{
-            backgroundColor: '#dcfce7',
-            border: '1px solid #6ee7b7',
-            padding: '15px',
-            borderRadius: '4px',
-            marginBottom: '20px',
-            fontSize: '13px',
-          }}>
-            <strong>What happens next:</strong><br />
-            1. Your signature is securely stored<br />
-            2. Forms are submitted to {submission.county} CAD<br />
-            3. Informal hearing scheduled automatically<br />
-            4. You receive hearing details via email
-          </div>
-
-          {error && <div style={{ color: '#d32f2f', marginBottom: '15px', fontSize: '14px' }}>Error: {error}</div>}
-
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button
-              onClick={() => setStep(2)}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: '#fff',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-              }}
-            >
-              Back
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              style={{
-                flex: 1,
-                padding: '12px',
-                backgroundColor: isSubmitting ? '#ccc' : '#047857',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                fontWeight: 'bold',
-                opacity: isSubmitting ? 0.6 : 1,
-              }}
-            >
-              {isSubmitting ? '⏳ Submitting...' : 'File My Protest →'}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

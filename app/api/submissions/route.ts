@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // Extract user from auth token if provided
     let userId: number | undefined = undefined
-    const auth = request.headers.get('authorization')
+    const auth = req.headers.get('authorization')
     if (auth?.startsWith('Bearer ')) {
       try {
         const decoded = Buffer.from(auth.replace('Bearer ', ''), 'base64').toString('utf-8')
